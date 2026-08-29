@@ -23,18 +23,21 @@ def upsert_profile(user_id: str, data: StudentProfileCreate) -> StudentProfileRe
         name = data.name if data.name else "Student User"
         skills_json = json.dumps(data.skills)
         interests_json = json.dumps(data.interests)
+        avail = data.availability_time if data.availability_time and data.availability_time.strip() else "Flexible"
+        part = data.hackathons_participated if data.hackathons_participated is not None else 0
+        won = data.hackathons_won if data.hackathons_won is not None else 0
 
         if exists:
             cursor.execute("""
                 UPDATE student_profiles
-                SET name = ?, college = ?, qualification = ?, skills = ?, interests = ?, preferred_role = ?, team_preference = ?
+                SET name = ?, college = ?, qualification = ?, skills = ?, interests = ?, preferred_role = ?, team_preference = ?, availability_time = ?, hackathons_participated = ?, hackathons_won = ?
                 WHERE user_id = ?;
-            """, (name, data.college, data.qualification, skills_json, interests_json, data.preferred_role, data.team_preference, user_id))
+            """, (name, data.college, data.qualification, skills_json, interests_json, data.preferred_role, data.team_preference, avail, part, won, user_id))
         else:
             cursor.execute("""
-                INSERT INTO student_profiles (user_id, name, college, qualification, skills, interests, preferred_role, team_preference)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-            """, (user_id, name, data.college, data.qualification, skills_json, interests_json, data.preferred_role, data.team_preference))
+                INSERT INTO student_profiles (user_id, name, college, qualification, skills, interests, preferred_role, team_preference, availability_time, hackathons_participated, hackathons_won)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """, (user_id, name, data.college, data.qualification, skills_json, interests_json, data.preferred_role, data.team_preference, avail, part, won))
         conn.commit()
 
         return StudentProfileResponse(
@@ -45,14 +48,17 @@ def upsert_profile(user_id: str, data: StudentProfileCreate) -> StudentProfileRe
             skills=data.skills,
             interests=data.interests,
             preferred_role=data.preferred_role,
-            team_preference=data.team_preference
+            team_preference=data.team_preference,
+            availability_time=avail,
+            hackathons_participated=part,
+            hackathons_won=won
         )
 
 def get_profile_by_user_id(user_id: str) -> Optional[StudentProfileResponse]:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT user_id, name, college, qualification, skills, interests, preferred_role, team_preference
+            SELECT user_id, name, college, qualification, skills, interests, preferred_role, team_preference, availability_time, hackathons_participated, hackathons_won
             FROM student_profiles
             WHERE user_id = ?;
         """, (user_id,))
@@ -62,6 +68,12 @@ def get_profile_by_user_id(user_id: str) -> Optional[StudentProfileResponse]:
         
         skills = json.loads(row["skills"]) if row["skills"] else []
         interests = json.loads(row["interests"]) if row["interests"] else []
+        
+        # Handle backward compatibility for existing SQLite rows
+        keys = row.keys()
+        avail = row["availability_time"] if "availability_time" in keys and row["availability_time"] else "Flexible"
+        part = row["hackathons_participated"] if "hackathons_participated" in keys and row["hackathons_participated"] is not None else 0
+        won = row["hackathons_won"] if "hackathons_won" in keys and row["hackathons_won"] is not None else 0
 
         return StudentProfileResponse(
             user_id=row["user_id"],
@@ -71,7 +83,10 @@ def get_profile_by_user_id(user_id: str) -> Optional[StudentProfileResponse]:
             skills=skills,
             interests=interests,
             preferred_role=row["preferred_role"],
-            team_preference=row["team_preference"]
+            team_preference=row["team_preference"],
+            availability_time=avail,
+            hackathons_participated=part,
+            hackathons_won=won
         )
 
 def get_teammate_matches(current_user_id: str) -> TeamMatchResponse:
@@ -79,11 +94,12 @@ def get_teammate_matches(current_user_id: str) -> TeamMatchResponse:
     cur_skills = set(s.lower() for s in current_profile.skills) if current_profile else set()
     cur_interests = set(i.lower() for i in current_profile.interests) if current_profile else set()
     cur_role = current_profile.preferred_role.lower() if current_profile and current_profile.preferred_role else ""
+    cur_avail = current_profile.availability_time if current_profile and current_profile.availability_time else "Flexible"
 
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT user_id, name, skills, interests, preferred_role
+            SELECT user_id, name, skills, interests, preferred_role, availability_time, hackathons_participated, hackathons_won
             FROM student_profiles
             WHERE user_id != ?;
         """, (current_user_id,))
@@ -96,6 +112,10 @@ def get_teammate_matches(current_user_id: str) -> TeamMatchResponse:
             skills = json.loads(row["skills"]) if row["skills"] else []
             interests = json.loads(row["interests"]) if row["interests"] else []
             pref_role = row["preferred_role"] or ""
+            keys = row.keys()
+            avail = row["availability_time"] if "availability_time" in keys and row["availability_time"] else "Flexible"
+            part = row["hackathons_participated"] if "hackathons_participated" in keys and row["hackathons_participated"] is not None else 0
+            won = row["hackathons_won"] if "hackathons_won" in keys and row["hackathons_won"] is not None else 0
 
             cand_skills = set(s.lower() for s in skills)
             cand_interests = set(i.lower() for i in interests)
@@ -116,6 +136,10 @@ def get_teammate_matches(current_user_id: str) -> TeamMatchResponse:
             shared_skills = cur_skills.intersection(cand_skills)
             score += len(shared_skills) * 10
 
+            # Experience bonus (+5 if candidate has hackathon experience)
+            if part > 0:
+                score += min(part * 2, 10)
+
             # Clamp score between 25 and 98
             clamped_score = max(25, min(score, 98))
 
@@ -126,6 +150,9 @@ def get_teammate_matches(current_user_id: str) -> TeamMatchResponse:
                     skills=skills,
                     interests=interests,
                     preferred_role=pref_role if pref_role else None,
+                    availability_time=avail,
+                    hackathons_participated=part,
+                    hackathons_won=won,
                     match_score=clamped_score
                 )
             )
