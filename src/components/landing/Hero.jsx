@@ -50,7 +50,7 @@ export function Hero() {
         </motion.p>
 
         <motion.div variants={item} className="flex flex-col sm:flex-row items-center gap-6">
-          <Link to="/signup">
+          <Link to="/login">
             <Button variant="primary" size="lg" className="px-8 font-semibold rounded-full bg-gradient-to-b from-[#D4AF37] to-[#996515] text-black border-none hover:opacity-90 shadow-[0_0_20px_rgba(184,134,11,0.3)]">
               Get Started <ArrowRight size={16} className="ml-2" />
             </Button>

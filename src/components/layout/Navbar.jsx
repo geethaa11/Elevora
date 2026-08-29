@@ -81,7 +81,7 @@ export function Navbar() {
               <Link to="/login" className="hidden sm:block">
                 <Button variant="ghost">Log in</Button>
               </Link>
-              <Link to="/signup">
+              <Link to="/login">
                 <Button variant="primary">Get Started</Button>
               </Link>
             </>
