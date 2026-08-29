@@ -6,7 +6,12 @@ import { Grow } from '../components/landing/Grow';
 import { JoinUs } from '../components/landing/JoinUs';
 import { FinalCta } from '../components/landing/FinalCta';
 import { ScrollRail } from '../components/landing/ScrollRail';
-import { CursorGlow } from '../components/landing/CursorGlow';
+
+import { LoadingScreen } from '../components/motion/LoadingScreen';
+import { CursorTrail } from '../components/motion/CursorTrail';
+import { TwinklingStars } from '../components/motion/TwinklingStars';
+import { ScrollStarLine } from '../components/motion/ScrollStarLine';
+import { Marquee } from '../components/motion/Marquee';
 
 export function Landing() {
   const [activeSection, setActiveSection] = useState('home');
@@ -34,7 +39,11 @@ export function Landing() {
 
   return (
     <div className="relative w-full bg-background text-neutral-50 overflow-hidden">
-      <CursorGlow />
+      <LoadingScreen />
+      <CursorTrail />
+      <TwinklingStars />
+      <ScrollStarLine />
+      
       <ScrollRail activeSection={activeSection} />
       
       <div className="relative z-10">
@@ -43,6 +52,7 @@ export function Landing() {
         <Build />
         <Grow />
         <JoinUs />
+        <Marquee />
         <FinalCta />
       </div>
     </div>

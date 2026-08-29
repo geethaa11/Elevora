@@ -35,6 +35,15 @@ export default {
       fontFamily: {
         display: ['"DM Serif Display"', 'serif'],
         sans: ['Inter', 'sans-serif'],
+      },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        }
+      },
+      animation: {
+        marquee: 'marquee 25s linear infinite',
       }
     },
   },
