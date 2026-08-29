@@ -7,18 +7,82 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Node
+node_modules/
+dist/
+dist-ssr/
 *.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+cython_debug/
+.ipynb_checkpoints/
+.pybuilder/
+.pdm-python
+.pdm-build/
+.pixi/
+__pypackages__/
+
+# Python environments
+.env
+.envrc
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.db
+
+# Python tooling
+.pypirc
+tempCodeRunnerFile.py
+
+# Package managers
+Pipfile.lock
+poetry.lock
+poetry.toml
+pdm.lock
+pdm.toml
+uv.lock
+
+# Documentation builds
+docs/_build/
+/site
+
+# Project/tool-specific
+.scrapy
+profile_default/
+celerybeat-schedule
+celerybeat.pid
+*.rdb
+*.aof
+mnesia/
+rabbitmq/
+rabbitmq-data/
+activemq-data/
+.ropeproject
+.spyderproject
+.spyproject
+.abstra/
+.streamlit/secrets.toml
