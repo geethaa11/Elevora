@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AuthShell } from './components/layout/AuthShell';
 import { DashboardLayout } from './components/layout/DashboardLayout';
@@ -18,8 +18,9 @@ import { FeaturePlaceholder } from './pages/FeaturePlaceholder';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
+
           {/* Public & Auth Routes */}
           <Route element={<AuthShell />}>
             <Route path="/" element={<Landing />} />
@@ -28,18 +29,18 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
 
-          {/* Onboarding - standalone protected layout without sidebar */}
-          <Route 
-            path="/onboarding" 
+          {/* Onboarding */}
+          <Route
+            path="/onboarding"
             element={
               <ProtectedRoute>
                 <Onboarding />
               </ProtectedRoute>
-            } 
+            }
           />
 
           {/* Protected Dashboard Routes */}
-          <Route 
+          <Route
             element={
               <ProtectedRoute>
                 <DashboardLayout />
@@ -48,15 +49,50 @@ function App() {
           >
             <Route path="/home" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
-            
-            {/* Feature Placeholders */}
-            <Route path="/hackathons" element={<FeaturePlaceholder title="Hackathon Explorer" description="Find and join upcoming hackathons." />} />
-            <Route path="/validator" element={<FeaturePlaceholder title="AI Idea Validator" description="Validate and refine your hackathon ideas with AI." />} />
-            <Route path="/teaming" element={<FeaturePlaceholder title="Student Teaming" description="Find the perfect team members for your next project." />} />
-            <Route path="/mentors" element={<FeaturePlaceholder title="Mentor Marketplace" description="Connect with experienced mentors." />} />
+
+            <Route
+              path="/hackathons"
+              element={
+                <FeaturePlaceholder
+                  title="Hackathon Explorer"
+                  description="Find and join upcoming hackathons."
+                />
+              }
+            />
+
+            <Route
+              path="/validator"
+              element={
+                <FeaturePlaceholder
+                  title="AI Idea Validator"
+                  description="Validate and refine your hackathon ideas with AI."
+                />
+              }
+            />
+
+            <Route
+              path="/teaming"
+              element={
+                <FeaturePlaceholder
+                  title="Student Teaming"
+                  description="Find the perfect team members for your next project."
+                />
+              }
+            />
+
+            <Route
+              path="/mentors"
+              element={
+                <FeaturePlaceholder
+                  title="Mentor Marketplace"
+                  description="Connect with experienced mentors."
+                />
+              }
+            />
           </Route>
+
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }
