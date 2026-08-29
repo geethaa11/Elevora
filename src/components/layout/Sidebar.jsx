@@ -6,18 +6,21 @@ import {
   Home, 
   Compass, 
   Lightbulb, 
-  MessageSquare, 
   Users, 
+  Presentation,
+  MessageSquare, 
+  User,
   Settings 
 } from 'lucide-react';
 
 export function Sidebar({ className }) {
   const navItems = [
-    { label: 'Overview', icon: Home, href: '/home' },
-    { label: 'Hackathons', icon: Compass, href: '/hackathons' },
-    { label: 'Idea Validator', icon: Lightbulb, href: '/validator' },
-    { label: 'Teaming', icon: Users, href: '/teaming' },
-    { label: 'Mentors', icon: MessageSquare, href: '/mentors' },
+    { label: 'Home', icon: Home, href: '/home' },
+    { label: 'Hackathon Explorer', icon: Compass, href: '/hackathons' },
+    { label: 'Student Teaming', icon: Users, href: '/team-builder' },
+    { label: 'AI Validator', icon: Lightbulb, href: '/validator' },
+    { label: 'AI Demo Coach', icon: Presentation, href: '/demo-coach' },
+    { label: 'Mentor Marketplace', icon: MessageSquare, href: '/mentors' },
   ];
 
   return (
@@ -44,13 +47,26 @@ export function Sidebar({ className }) {
         ))}
       </div>
 
-      <div className="p-4 border-t border-neutral-700">
+      <div className="p-4 border-t border-neutral-700 space-y-1">
         <NavLink
           to="/profile"
           className={({ isActive }) => cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
             isActive 
               ? "bg-primary/10 text-primary" 
+              : "text-neutral-200 hover:bg-neutral-800 hover:text-neutral-50"
+          )}
+        >
+          <User size={18} />
+          Profile
+        </NavLink>
+
+        <NavLink
+          to="/profile"
+          className={({ isActive }) => cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            isActive 
+              ? "bg-primary/10 text-primary font-medium" 
               : "text-neutral-200 hover:bg-neutral-800 hover:text-neutral-50"
           )}
         >
@@ -61,3 +77,4 @@ export function Sidebar({ className }) {
     </aside>
   );
 }
+

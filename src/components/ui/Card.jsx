@@ -14,3 +14,6 @@ export function Card({ className, children, ...props }) {
     </div>
   );
 }
+
+export default Card;
+
