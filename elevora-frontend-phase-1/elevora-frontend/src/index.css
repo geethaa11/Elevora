@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #0D0D0F;
+  color: #E5E7EB;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'DM Serif Display', serif;
+  margin: 0;
+}
+
+p, span, a, button, input, label {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Visible keyboard focus states everywhere */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #B8860B;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Custom scrollbar, gold-tinted */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0D0D0F;
+}
+::-webkit-scrollbar-thumb {
+  background: #2C2C34;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8860B;
+}
+
+/* Hide native cursor for fine-pointer devices where custom glow is active */
+@media (hover: hover) and (pointer: fine) {
+  .cursor-glow-active {
+    cursor: none;
+  }
+}
+
+.text-gold {
+  color: #B8860B;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #B8860B;
+  font-weight: 600;
+}
+
+.section-shell {
+  position: relative;
+  padding: 6rem 1.5rem;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .section-shell {
+    padding: 8rem 3rem;
+  }
+}
+
+.glass-panel {
+  background: rgba(26, 26, 29, 0.6);
+  border: 1px solid #2C2C34;
+  backdrop-filter: blur(12px);
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

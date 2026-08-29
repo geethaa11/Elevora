@@ -15,6 +15,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     profile = relationship("StudentProfile", back_populates="user", uselist=False)
+    verification = relationship("UserVerification", back_populates="user", uselist=False)
 
 class StudentProfile(Base):
     __tablename__ = "student_profiles"

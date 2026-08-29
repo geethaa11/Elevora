@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Dr. Sarah Connor",
+    "expertise": ["Machine Learning", "System Security"],
+    "rating": 4.9
+  },
+  {
+    "id": 2,
+    "name": "Linus Torvalds",
+    "expertise": ["Linux Kernels", "C Programming", "Git"],
+    "rating": 5.0
+  },
+  {
+    "id": 3,
+    "name": "Grace Hopper",
+    "expertise": ["Compilers", "COBOL", "Debugging"],
+    "rating": 4.8
+  },
+  {
+    "id": 4,
+    "name": "Alan Turing",
+    "expertise": ["Cryptography", "Algorithms", "Computation Theory"],
+    "rating": 4.95
+  },
+  {
+    "id": 5,
+    "name": "Ada Lovelace",
+    "expertise": ["Mathematical Models", "Analytical Engines", "Product Design"],
+    "rating": 4.85
+  },
+  {
+    "id": 6,
+    "name": "Guido van Rossum",
+    "expertise": ["Python", "Software Architecture"],
+    "rating": 4.9
+  },
+  {
+    "id": 7,
+    "name": "Tim Berners-Lee",
+    "expertise": ["HTML", "HTTP Protocols", "Web Accessibility"],
+    "rating": 4.75
+  },
+  {
+    "id": 8,
+    "name": "Donald Knuth",
+    "expertise": ["Algorithms Analysis", "TeX Typesetting", "Data Structures"],
+    "rating": 4.99
+  }
+]

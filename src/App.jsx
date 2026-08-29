@@ -44,8 +44,9 @@ function App() {
   return (
     <AuthProvider>
       <AppStateProvider>
-        <BrowserRouter basename="/EleVora">
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
+
             {/* Public & Auth Routes */}
             <Route element={<AuthShell />}>
               <Route path="/" element={<Landing />} />
@@ -54,18 +55,18 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
             </Route>
 
-            {/* Onboarding - standalone protected layout without sidebar */}
-            <Route 
-              path="/onboarding" 
+            {/* Onboarding */}
+            <Route
+              path="/onboarding"
               element={
                 <ProtectedRoute>
                   <Onboarding />
                 </ProtectedRoute>
-              } 
+              }
             />
 
             {/* Protected Dashboard Routes */}
-            <Route 
+            <Route
               element={
                 <ProtectedRoute>
                   <DashboardLayout />
@@ -74,7 +75,7 @@ function App() {
             >
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
-              
+
               {/* Hackathon Explorer */}
               <Route path="/hackathons" element={<HackathonExplorer />} />
               <Route path="/hackathons/:id" element={<HackathonDetails />} />
@@ -83,7 +84,10 @@ function App() {
               <Route path="/team-builder" element={<TeamBuilder />} />
               <Route path="/team-builder/create" element={<CreateTeam />} />
               <Route path="/team-builder/:id" element={<TeammateProfile />} />
-              <Route path="/teaming" element={<Navigate to="/team-builder" replace />} />
+              <Route
+                path="/teaming"
+                element={<Navigate to="/team-builder" replace />}
+              />
 
               {/* AI Idea Validator */}
               <Route path="/validator" element={<ValidatorInput />} />
@@ -91,20 +95,45 @@ function App() {
 
               {/* AI Demo Coach */}
               <Route path="/demo-coach" element={<DemoCoachInput />} />
-              <Route path="/demo-coach/result" element={<PitchAnalysisResult />} />
-              <Route path="/demo-coach/feedback" element={<DetailedFeedback />} />
-              <Route path="/demo-coach/improved-pitch" element={<ImprovedPitch />} />
-              <Route path="/demo-coach/mock-judge" element={<MockJudge />} />
+              <Route
+                path="/demo-coach/result"
+                element={<PitchAnalysisResult />}
+              />
+              <Route
+                path="/demo-coach/feedback"
+                element={<DetailedFeedback />}
+              />
+              <Route
+                path="/demo-coach/improved-pitch"
+                element={<ImprovedPitch />}
+              />
+              <Route
+                path="/demo-coach/mock-judge"
+                element={<MockJudge />}
+              />
 
               {/* Mentor Marketplace */}
               <Route path="/mentors" element={<MentorMarketplace />} />
               <Route path="/mentors/free" element={<FreeMentors />} />
-              <Route path="/mentors/free/:id" element={<FreeMentorProfile />} />
-              <Route path="/mentors/free/:id/request" element={<FreeGuidanceRequest />} />
+              <Route
+                path="/mentors/free/:id"
+                element={<FreeMentorProfile />}
+              />
+              <Route
+                path="/mentors/free/:id/request"
+                element={<FreeGuidanceRequest />}
+              />
               <Route path="/mentors/paid" element={<PaidMentors />} />
-              <Route path="/mentors/paid/:id" element={<PaidMentorProfile />} />
-              <Route path="/mentors/paid/:id/book" element={<PaidBooking />} />
+              <Route
+                path="/mentors/paid/:id"
+                element={<PaidMentorProfile />}
+              />
+              <Route
+                path="/mentors/paid/:id/book"
+                element={<PaidBooking />}
+              />
             </Route>
+
           </Routes>
         </BrowserRouter>
       </AppStateProvider>

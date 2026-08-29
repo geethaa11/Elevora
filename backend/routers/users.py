@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models.db_models import User, StudentProfile
@@ -7,6 +7,7 @@ from backend.schemas.user_schemas import StudentProfileBase, UserResponse, Match
 from typing import List
 from backend.services.matching_service import get_matches_for_user
 from backend.services.auth_service import get_current_user
+from backend.services.neo4j_service import sync_student_profile
 
 router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
@@ -42,7 +43,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     return format_user_response(user)
 
 @router.post("/{user_id}/onboarding")
-def onboarding(user_id: int, request: StudentProfileBase, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def onboarding(user_id: int, request: StudentProfileBase, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized to modify this user")
         
@@ -63,11 +64,13 @@ def onboarding(user_id: int, request: StudentProfileBase, db: Session = Depends(
     db.commit()
     db.refresh(profile)
     
+    background_tasks.add_task(sync_student_profile, user_id, request.skills or [], request.interests or [])
+    
     user = db.query(User).filter(User.id == user_id).first()
     return {"success": True, "profile": format_user_response(user)["profile"]}
 
 @router.put("/{user_id}", response_model=StudentProfileBase)
-def update_profile(user_id: int, request: StudentProfileBase, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_profile(user_id: int, request: StudentProfileBase, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized to modify this user")
         
@@ -89,6 +92,11 @@ def update_profile(user_id: int, request: StudentProfileBase, db: Session = Depe
     
     db.commit()
     db.refresh(profile)
+    
+    # Send current skills/interests from request if present, else load from db
+    current_skills = update_data.get('skills', json.loads(profile.skills) if profile.skills else [])
+    current_interests = update_data.get('interests', json.loads(profile.interests) if profile.interests else [])
+    background_tasks.add_task(sync_student_profile, user_id, current_skills, current_interests)
     
     user = db.query(User).filter(User.id == user_id).first()
     return format_user_response(user)["profile"]

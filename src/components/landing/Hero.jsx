@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Logo } from '../layout/Logo';
 import { Button } from '../ui/Button';
 import { Play, ArrowRight } from 'lucide-react';
+import { HeroBackground } from './HeroBackground';
 
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
@@ -26,55 +27,9 @@ export function Hero() {
   };
 
   return (
-    <section id="home" className="relative flex min-h-[110vh] flex-col items-center justify-center overflow-hidden bg-[#050505] pt-20 pb-32">
-      {/* Background Image & Overlay */}
-      <div className="absolute inset-0 z-0">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/background.jpg')" }}
-        />
-        {/* Gradient overlay to fade into the black background at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505]" />
-
-        {/* Large sweeping glowing dust bands */}
-        <div className="absolute top-1/4 left-0 w-full h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(184,134,11,0.15)_0%,transparent_60%)] transform -rotate-12 blur-2xl" />
-        <div className="absolute top-1/3 right-0 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(184,134,11,0.1)_0%,transparent_60%)] transform rotate-12 blur-2xl" />
-
-        {/* Floating Asteroids (simulated with dots) */}
-        {!shouldReduceMotion && (
-          <div className="absolute inset-0 overflow-hidden">
-             {[...Array(20)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute rounded-full bg-[#3a2d10] shadow-[0_0_10px_1px_rgba(184,134,11,0.3)]"
-                  style={{
-                    width: Math.random() * 6 + 2 + 'px',
-                    height: Math.random() * 6 + 2 + 'px',
-                    left: Math.random() * 100 + '%',
-                    top: Math.random() * 100 + '%',
-                  }}
-                  animate={{
-                    x: [0, Math.random() * 100 - 50],
-                    y: [0, Math.random() * 100 - 50],
-                    opacity: [0.2, 0.8, 0.2],
-                  }}
-                  transition={{
-                    duration: Math.random() * 10 + 10,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }}
-                />
-             ))}
-          </div>
-        )}
-
-        {/* Massive Horizon Planet at bottom */}
-        <div className="absolute bottom-[-30%] left-1/2 w-[200%] max-w-[3000px] -translate-x-1/2 aspect-[2/1]">
-           <div className="absolute inset-0 rounded-[100%] bg-background border-t border-primary/30 shadow-[0_-20px_100px_30px_rgba(184,134,11,0.15)]" />
-           <div className="absolute inset-0 rounded-[100%] border-t-2 border-primary opacity-60 blur-[2px]" />
-           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-40 bg-primary/20 blur-[60px]" />
-        </div>
-      </div>
+    <section id="home" className="relative flex min-h-[110vh] flex-col items-center justify-center overflow-hidden bg-[#0D0D0F] pt-20 pb-32">
+      {/* 3D Background Layer */}
+      <HeroBackground />
 
       <motion.div 
         variants={container}
