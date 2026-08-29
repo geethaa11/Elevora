@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Logo } from './Logo';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
@@ -45,7 +44,13 @@ export function Navbar() {
       )}
     >
       <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Logo />
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center gap-2 group">
+            <span className="font-display text-2xl font-bold tracking-widest text-primary drop-shadow-[0_0_10px_rgba(184,134,11,0.5)]">
+              ELEVORA
+            </span>
+          </Link>
+        </div>
         
         {/* Center Links (Desktop only) */}
         <div className="hidden lg:flex items-center gap-8">

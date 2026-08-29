@@ -7,8 +7,6 @@ import { JoinUs } from '../components/landing/JoinUs';
 import { FinalCta } from '../components/landing/FinalCta';
 import { ScrollRail } from '../components/landing/ScrollRail';
 import { CursorGlow } from '../components/landing/CursorGlow';
-import { SmoothScroll } from '../components/landing/SmoothScroll';
-import { Scene } from '../components/landing/Scene'; // We will create this
 
 export function Landing() {
   const [activeSection, setActiveSection] = useState('home');
@@ -35,26 +33,18 @@ export function Landing() {
   }, []);
 
   return (
-    <SmoothScroll>
-      <div className="relative w-full bg-background text-neutral-50 overflow-hidden">
-        {/* Fixed 3D Canvas Background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <Scene />
-        </div>
-
-        <CursorGlow />
-        <ScrollRail activeSection={activeSection} />
-        
-        {/* Foreground Content - Made transparent to show 3D */}
-        <div className="relative z-10 pointer-events-none [&>*]:pointer-events-auto">
-          <Hero />
-          <Discover />
-          <Build />
-          <Grow />
-          <JoinUs />
-          <FinalCta />
-        </div>
+    <div className="relative w-full bg-background text-neutral-50 overflow-hidden">
+      <CursorGlow />
+      <ScrollRail activeSection={activeSection} />
+      
+      <div className="relative z-10">
+        <Hero />
+        <Discover />
+        <Build />
+        <Grow />
+        <JoinUs />
+        <FinalCta />
       </div>
-    </SmoothScroll>
+    </div>
   );
 }
