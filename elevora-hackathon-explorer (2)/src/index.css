@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-bg text-neutral-200 font-sans antialiased;
+}
+
+/* visible keyboard focus, kept subtle and on-brand */
+:focus-visible {
+  outline: 2px solid #b8860b;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* thin scrollbar for the horizontal filter chip row on small screens */
+.chip-row::-webkit-scrollbar {
+  height: 4px;
+}
+.chip-row::-webkit-scrollbar-thumb {
+  background: #2c2c34;
+  border-radius: 4px;
+}
