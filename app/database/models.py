@@ -31,6 +31,9 @@ class StudentProfileModel:
     interests: List[str]
     preferred_role: Optional[str]
     team_preference: Optional[str]
+    availability_time: Optional[str] = "Flexible"
+    hackathons_participated: int = 0
+    hackathons_won: int = 0
 
 @dataclass
 class TeamMemberModel:

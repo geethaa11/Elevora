@@ -95,6 +95,9 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# Streamlit
+.streamlit/secrets.toml
+
 # Frontend Node/Vite specific
 /frontend/node_modules
 /frontend/dist

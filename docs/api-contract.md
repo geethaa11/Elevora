@@ -85,7 +85,18 @@ Errors: `401 { "error": "invalid_credentials" }`, `422 missing_field`
 ### POST /users
 Extends the signup profile. Request:
 ```json
-{ "skills": ["string"], "interests": ["string"], "bio": "string, optional", "college": "string, optional" }
+{
+  "skills": ["string"],
+  "interests": ["string"],
+  "bio": "string, optional",
+  "college": "string, optional",
+  "qualification": "string, optional",
+  "preferred_role": "string, optional",
+  "team_preference": "string, optional",
+  "availability_time": "string, required, non-empty",
+  "hackathons_participated": "integer, required, >= 0",
+  "hackathons_won": "integer, required, >= 0, <= hackathons_participated"
+}
 ```
 Auth required — updates the profile for `sub` from the token.
 Success 200: full user object (see GET /users/{id} shape).
@@ -94,7 +105,21 @@ Errors: `401 unauthorized`, `422 missing_field`
 ### GET /users/{id}
 Success 200:
 ```json
-{ "user_id": "string", "email": "string", "name": "string", "skills": ["string"], "interests": ["string"], "bio": "string", "college": "string" }
+{
+  "user_id": "string",
+  "email": "string",
+  "name": "string",
+  "skills": ["string"],
+  "interests": ["string"],
+  "bio": "string",
+  "college": "string",
+  "qualification": "string",
+  "preferred_role": "string",
+  "team_preference": "string",
+  "availability_time": "string",
+  "hackathons_participated": 0,
+  "hackathons_won": 0
+}
 ```
 Errors: `404 not_found`
 
