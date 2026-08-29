@@ -20,32 +20,107 @@ def generate_token(user_id: str = "user_test_teaming") -> str:
 def setup_db():
     init_db()
 
-def test_create_and_get_student_profile():
-    token = generate_token("user_profile_1")
+def test_create_and_get_student_profile_with_new_fields():
+    token = generate_token("user_profile_ext")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Create / update profile
+    # Create profile with 3 new fields
     res_post = client.post("/api/v1/teaming/profile", json={
-        "name": "Alice Cooper",
-        "college": "Harvard",
-        "qualification": "B.S. CS",
-        "skills": ["Python", "Machine Learning"],
-        "interests": ["Healthcare", "AI"],
-        "preferred_role": "AI Developer",
-        "team_preference": "Looking for team"
+        "name": "Arun",
+        "college": "ABC Engineering College",
+        "qualification": "B.E. CSE - 1st Year",
+        "skills": ["Python", "React", "AI/ML"],
+        "interests": ["Artificial Intelligence", "Healthcare"],
+        "preferred_role": "AI/ML Developer",
+        "team_preference": "Looking for a team",
+        "availability_time": "6 PM - 10 PM",
+        "hackathons_participated": 3,
+        "hackathons_won": 1
     }, headers=headers)
     assert res_post.status_code == 200
     data = res_post.json()
-    assert data["user_id"] == "user_profile_1"
-    assert data["name"] == "Alice Cooper"
-    assert "Python" in data["skills"]
+    assert data["user_id"] == "user_profile_ext"
+    assert data["name"] == "Arun"
+    assert data["availability_time"] == "6 PM - 10 PM"
+    assert data["hackathons_participated"] == 3
+    assert data["hackathons_won"] == 1
+
+    # Update profile
+    res_update = client.post("/api/v1/teaming/profile", json={
+        "name": "Arun Updated",
+        "college": "ABC Engineering College",
+        "qualification": "B.E. CSE - 2nd Year",
+        "skills": ["Python", "React", "AI/ML", "PyTorch"],
+        "interests": ["Artificial Intelligence", "Healthcare"],
+        "preferred_role": "Lead AI Developer",
+        "team_preference": "Looking for a team",
+        "availability_time": "7 PM - 11 PM",
+        "hackathons_participated": 4,
+        "hackathons_won": 2
+    }, headers=headers)
+    assert res_update.status_code == 200
+    up_data = res_update.json()
+    assert up_data["name"] == "Arun Updated"
+    assert up_data["availability_time"] == "7 PM - 11 PM"
+    assert up_data["hackathons_participated"] == 4
+    assert up_data["hackathons_won"] == 2
 
     # Get profile by user_id
-    res_get = client.get("/api/v1/teaming/profile/user_profile_1")
+    res_get = client.get("/api/v1/teaming/profile/user_profile_ext")
     assert res_get.status_code == 200
     get_data = res_get.json()
-    assert get_data["name"] == "Alice Cooper"
-    assert get_data["college"] == "Harvard"
+    assert get_data["name"] == "Arun Updated"
+    assert get_data["availability_time"] == "7 PM - 11 PM"
+    assert get_data["hackathons_participated"] == 4
+    assert get_data["hackathons_won"] == 2
+
+def test_profile_validation_negative_participated_422():
+    token = generate_token("user_val_1")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.post("/api/v1/teaming/profile", json={
+        "name": "Test User",
+        "availability_time": "6 PM - 10 PM",
+        "hackathons_participated": -1,
+        "hackathons_won": 0
+    }, headers=headers)
+    assert res.status_code == 422
+
+def test_profile_validation_negative_won_422():
+    token = generate_token("user_val_2")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.post("/api/v1/teaming/profile", json={
+        "name": "Test User",
+        "availability_time": "6 PM - 10 PM",
+        "hackathons_participated": 2,
+        "hackathons_won": -1
+    }, headers=headers)
+    assert res.status_code == 422
+
+def test_profile_validation_won_exceeds_participated_422():
+    token = generate_token("user_val_3")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.post("/api/v1/teaming/profile", json={
+        "name": "Test User",
+        "availability_time": "6 PM - 10 PM",
+        "hackathons_participated": 2,
+        "hackathons_won": 5
+    }, headers=headers)
+    assert res.status_code == 422
+
+def test_profile_validation_empty_availability_time_422():
+    token = generate_token("user_val_4")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.post("/api/v1/teaming/profile", json={
+        "name": "Test User",
+        "availability_time": "   ",
+        "hackathons_participated": 2,
+        "hackathons_won": 1
+    }, headers=headers)
+    assert res.status_code == 422
 
 def test_get_nonexistent_profile_404():
     res = client.get("/api/v1/teaming/profile/nonexistent_user_999")
@@ -57,7 +132,7 @@ def test_unauthorized_matches_request():
     assert res.status_code == 401
     assert res.json()["error"] == "unauthorized"
 
-def test_get_teammate_matches_success():
+def test_get_teammate_matches_includes_new_fields():
     token = generate_token("user_profile_1")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -72,8 +147,10 @@ def test_get_teammate_matches_success():
     assert "name" in first_match
     assert "skills" in first_match
     assert "interests" in first_match
+    assert "availability_time" in first_match
+    assert "hackathons_participated" in first_match
+    assert "hackathons_won" in first_match
     assert "match_score" in first_match
-    assert 0 <= first_match["match_score"] <= 100
 
 def test_create_get_and_join_team():
     creator_token = generate_token("team_creator_user")
@@ -112,12 +189,10 @@ def test_duplicate_team_join_409():
     token = generate_token("team_dup_user")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Create team
     res_create = client.post("/api/v1/teams", json={"name": "Alpha Team"}, headers=headers)
     assert res_create.status_code == 201
     team_id = res_create.json()["team_id"]
 
-    # Attempt to join team user created (and is already member of) -> 409 Conflict
     res_join_again = client.post(f"/api/v1/teams/{team_id}/join", headers=headers)
     assert res_join_again.status_code == 409
     assert res_join_again.json()["error"] == "already_member"

@@ -117,7 +117,10 @@ DEMO_STUDENT_PROFILES = [
         "skills": ["Python", "AI", "PyTorch"],
         "interests": ["Healthcare", "AI"],
         "preferred_role": "AI/ML Engineer",
-        "team_preference": "Looking for team"
+        "team_preference": "Looking for team",
+        "availability_time": "6 PM - 10 PM",
+        "hackathons_participated": 3,
+        "hackathons_won": 1
     },
     {
         "user_id": "user_demo_2",
@@ -127,7 +130,10 @@ DEMO_STUDENT_PROFILES = [
         "skills": ["React", "TypeScript", "Tailwind"],
         "interests": ["Healthcare", "Fintech"],
         "preferred_role": "Frontend Developer",
-        "team_preference": "Looking for team"
+        "team_preference": "Looking for team",
+        "availability_time": "4 PM - 8 PM",
+        "hackathons_participated": 5,
+        "hackathons_won": 2
     },
     {
         "user_id": "user_demo_3",
@@ -137,7 +143,10 @@ DEMO_STUDENT_PROFILES = [
         "skills": ["Go", "Docker", "Kubernetes", "PostgreSQL"],
         "interests": ["AI", "DevOps"],
         "preferred_role": "Backend Developer",
-        "team_preference": "Looking for team"
+        "team_preference": "Looking for team",
+        "availability_time": "Flexible",
+        "hackathons_participated": 2,
+        "hackathons_won": 0
     },
     {
         "user_id": "user_demo_4",
@@ -147,7 +156,10 @@ DEMO_STUDENT_PROFILES = [
         "skills": ["Figma", "UI/UX", "User Research"],
         "interests": ["Healthcare", "Education"],
         "preferred_role": "UI/UX Designer",
-        "team_preference": "Looking for team"
+        "team_preference": "Looking for team",
+        "availability_time": "5 PM - 9 PM",
+        "hackathons_participated": 4,
+        "hackathons_won": 1
     }
 ]
 
@@ -198,9 +210,23 @@ def init_db():
                 skills TEXT NOT NULL,
                 interests TEXT NOT NULL,
                 preferred_role TEXT,
-                team_preference TEXT
+                team_preference TEXT,
+                availability_time TEXT DEFAULT 'Flexible',
+                hackathons_participated INTEGER DEFAULT 0,
+                hackathons_won INTEGER DEFAULT 0
             );
         """)
+        
+        # Migration check for existing databases
+        cursor.execute("PRAGMA table_info(student_profiles);")
+        existing_cols = [row["name"] for row in cursor.fetchall()]
+        if "availability_time" not in existing_cols:
+            cursor.execute("ALTER TABLE student_profiles ADD COLUMN availability_time TEXT DEFAULT 'Flexible';")
+        if "hackathons_participated" not in existing_cols:
+            cursor.execute("ALTER TABLE student_profiles ADD COLUMN hackathons_participated INTEGER DEFAULT 0;")
+        if "hackathons_won" not in existing_cols:
+            cursor.execute("ALTER TABLE student_profiles ADD COLUMN hackathons_won INTEGER DEFAULT 0;")
+
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS teams (
                 team_id TEXT PRIMARY KEY,
@@ -244,7 +270,19 @@ def init_db():
         if sp_count == 0:
             for sp in DEMO_STUDENT_PROFILES:
                 cursor.execute("""
-                    INSERT INTO student_profiles (user_id, name, college, qualification, skills, interests, preferred_role, team_preference)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-                """, (sp["user_id"], sp["name"], sp["college"], sp["qualification"], json.dumps(sp["skills"]), json.dumps(sp["interests"]), sp["preferred_role"], sp["team_preference"]))
+                    INSERT INTO student_profiles (user_id, name, college, qualification, skills, interests, preferred_role, team_preference, availability_time, hackathons_participated, hackathons_won)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """, (
+                    sp["user_id"],
+                    sp["name"],
+                    sp["college"],
+                    sp["qualification"],
+                    json.dumps(sp["skills"]),
+                    json.dumps(sp["interests"]),
+                    sp["preferred_role"],
+                    sp["team_preference"],
+                    sp.get("availability_time", "Flexible"),
+                    sp.get("hackathons_participated", 0),
+                    sp.get("hackathons_won", 0)
+                ))
             conn.commit()
