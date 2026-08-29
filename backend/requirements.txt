@@ -12,4 +12,4 @@ python-multipart
 email-validator
 python-dotenv>=1.0.0
 httpx>=0.24.1
-
+neo4j
