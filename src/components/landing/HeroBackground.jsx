@@ -68,16 +68,6 @@ function GlassGlobe({ shouldReduceMotion }) {
         />
       </Sphere>
 
-      {/* 2. Gridlines (Lat/Lon) */}
-      <Sphere args={[1.005, 24, 24]}>
-        <meshBasicMaterial 
-          color="#B8860B"
-          wireframe={true}
-          transparent={true}
-          opacity={0.15}
-        />
-      </Sphere>
-
       {/* 3. Continent Point Cloud */}
       <points>
         <bufferGeometry>
