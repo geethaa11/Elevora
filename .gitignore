@@ -53,6 +53,8 @@ venv.bak/
 
 # Database
 *.db
+*.db-journal
+*.sqlite3
 
 # Python tooling
 .pypirc
@@ -83,6 +85,25 @@ rabbitmq-data/
 activemq-data/
 .ropeproject
 .spyderproject
-.spyproject
 .abstra/
+
+# Streamlit
 .streamlit/secrets.toml
+
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
+
+# Frontend Node/Vite specific
+/frontend/node_modules
+/frontend/dist
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+# Backend local DB and environment config
+/backend/.env
+/backend/.env.local
