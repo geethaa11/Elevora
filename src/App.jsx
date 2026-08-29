@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AuthShell } from './components/layout/AuthShell';
 import { DashboardLayout } from './components/layout/DashboardLayout';
@@ -18,7 +18,7 @@ import { FeaturePlaceholder } from './pages/FeaturePlaceholder';
 function App() {
   return (
     <AuthProvider>
-      <HashRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
 
           {/* Public & Auth Routes */}
@@ -92,7 +92,7 @@ function App() {
           </Route>
 
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
