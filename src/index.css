@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Add global styles here if needed */
+  :root {
+    --color-background: #0D0D0F;
+    --color-surface: #1A1A1D;
+  }
+}
+
+@layer utilities {
+  .bg-ai-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary;
+  }
+  .text-ai-gradient {
+    @apply bg-ai-gradient bg-clip-text text-transparent;
+  }
+}

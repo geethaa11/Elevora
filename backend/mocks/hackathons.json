@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "name": "Global AI Hackathon 2026",
+    "organization": "AI Association",
+    "deadline": "2026-10-15T23:59:59Z",
+    "domain": "AI",
+    "eligibility": "All students & professionals",
+    "registration_url": "https://example.com/register/1"
+  },
+  {
+    "id": 2,
+    "name": "GreenTech Build",
+    "organization": "Climate Coalition",
+    "deadline": "2026-09-20T18:00:00Z",
+    "domain": "ClimateTech",
+    "eligibility": "Open to all developers",
+    "registration_url": "https://example.com/register/2"
+  },
+  {
+    "id": 3,
+    "name": "Web3 Future Finance",
+    "organization": "Solana Labs",
+    "deadline": "2026-11-05T00:00:00Z",
+    "domain": "Web3",
+    "eligibility": "University students only",
+    "registration_url": "https://example.com/register/3"
+  },
+  {
+    "id": 4,
+    "name": "HealthTech Innovation Summit",
+    "organization": "MedTech Ventures",
+    "deadline": "2026-10-01T23:59:59Z",
+    "domain": "HealthTech",
+    "eligibility": "Healthcare professionals & programmers",
+    "registration_url": "https://example.com/register/4"
+  },
+  {
+    "id": 5,
+    "name": "AI for Earth",
+    "organization": "Microsoft AI",
+    "deadline": "2026-09-30T23:59:59Z",
+    "domain": "AI",
+    "eligibility": "Researchers & practitioners",
+    "registration_url": "https://example.com/register/5"
+  },
+  {
+    "id": 6,
+    "name": "DeFi Hack",
+    "organization": "Ethereum Foundation",
+    "deadline": "2026-12-10T12:00:00Z",
+    "domain": "Web3",
+    "eligibility": "Open to all developers",
+    "registration_url": "https://example.com/register/6"
+  },
+  {
+    "id": 7,
+    "name": "Sustainathon 2026",
+    "organization": "EcoLabs Group",
+    "deadline": "2026-09-15T23:59:59Z",
+    "domain": "ClimateTech",
+    "eligibility": "Open to all",
+    "registration_url": "https://example.com/register/7"
+  },
+  {
+    "id": 8,
+    "name": "Bioinformatics Challenge",
+    "organization": "Genomic Institute",
+    "deadline": "2026-11-20T23:59:59Z",
+    "domain": "HealthTech",
+    "eligibility": "Bioinformaticians & data scientists",
+    "registration_url": "https://example.com/register/8"
+  },
+  {
+    "id": 9,
+    "name": "LLM Agents Hackathon",
+    "organization": "DeepMind Group",
+    "deadline": "2026-10-25T23:59:59Z",
+    "domain": "AI",
+    "eligibility": "Open to all creators",
+    "registration_url": "https://example.com/register/9"
+  },
+  {
+    "id": 10,
+    "name": "Zero Knowledge Zero Barriers",
+    "organization": "StarkWare",
+    "deadline": "2026-11-15T23:59:59Z",
+    "domain": "Web3",
+    "eligibility": "Cryptography experts & fans",
+    "registration_url": "https://example.com/register/10"
+  }
+]
