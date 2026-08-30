@@ -6,6 +6,8 @@ import { StudentCard } from "../../components/domain/StudentCard.jsx";
 import { EmptyState } from "../../components/domain/States.jsx";
 import { useAppState } from "../../context/AppStateContext.jsx";
 
+import { Shared3CardCarousel } from "../../components/ui/Shared3CardCarousel.jsx";
+
 export function TeamBuilder() {
   const { selectedHackathon, addTeamMember } = useAppState();
   const [query, setQuery] = useState("");
@@ -74,11 +76,13 @@ export function TeamBuilder() {
           } 
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((s) => (
-            <StudentCard key={s.id} student={s} onConnect={addTeamMember} />
-          ))}
-        </div>
+        <Shared3CardCarousel
+          title="Teammate Recommendations"
+          items={filtered}
+          renderCard={(student) => (
+            <StudentCard student={student} onConnect={addTeamMember} />
+          )}
+        />
       )}
     </div>
   );
