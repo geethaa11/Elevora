@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Code2, Cpu, Rocket } from 'lucide-react';
+import { ArrowRight, X, Heart, Code, Palette, Zap } from 'lucide-react';
 
 export function Build() {
   const shouldReduceMotion = useReducedMotion();
@@ -28,7 +28,6 @@ export function Build() {
       
       {/* Background ambient depth */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-         {/* Subtle ambient light from left */}
          <div className="absolute top-1/4 -left-1/4 w-1/2 h-1/2 bg-[radial-gradient(ellipse_at_center,rgba(109,40,217,0.06)_0%,transparent_70%)] blur-2xl" />
       </div>
 
@@ -38,89 +37,85 @@ export function Build() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
-          className="grid lg:grid-cols-12 gap-12 items-center flex-col-reverse lg:flex-row" // Visual on left, Text on right
+          className="grid lg:grid-cols-12 gap-12 items-center flex-col-reverse lg:flex-row"
         >
           
-          {/* Visual: Glowing Cube/Tech Platform (Slides from left) */}
+          {/* Visual: Stacked Swipe Cards (Slides from left) */}
           <motion.div 
             variants={visualContainer}
             className="lg:col-span-7 relative h-[600px] w-full flex items-center justify-center z-10 order-2 lg:order-1"
           >
-            {/* Ambient Gold/Purple glow behind visual */}
+            {/* Ambient Gold glow behind visual */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[radial-gradient(ellipse_at_center,rgba(184,134,11,0.1)_0%,transparent_60%)] pointer-events-none blur-2xl -z-10" />
             
-             {/* Glowing Pedestal Rings (Smaller for Build) */}
-            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[400px] h-[100px] pointer-events-none z-0">
-              <div className="absolute inset-0 rounded-[100%] border border-primary/20 shadow-[0_0_20px_rgba(184,134,11,0.1),inset_0_0_20px_rgba(184,134,11,0.05)]" style={{ transform: 'perspective(500px) rotateX(75deg)' }} />
-              <div className="absolute inset-4 rounded-[100%] border border-primary/40 blur-[1px]" style={{ transform: 'perspective(500px) rotateX(75deg)' }} />
-              {/* Upward glow rays */}
-              <div className="absolute bottom-1/2 left-1/2 -translate-x-1/2 w-1/2 h-[200px] bg-gradient-to-t from-primary/5 to-transparent blur-xl" />
-            </div>
+            <div className="relative w-full max-w-[320px] h-[440px] z-30 pointer-events-none">
+              
+              {/* Back Card */}
+              <Card className="absolute inset-0 shadow-2xl bg-[#111113]/80 backdrop-blur-md border border-neutral-800 rounded-2xl transform rotate-6 scale-90 translate-x-6 translate-y-4 opacity-40">
+              </Card>
 
-            {/* Isometric abstract tech elements */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 -mt-10">
-               {/* Central "Core" */}
-               <div className="relative w-[150px] h-[150px] border border-primary/40 bg-surface/30 backdrop-blur-md shadow-[0_0_40px_rgba(184,134,11,0.2)] flex items-center justify-center" style={{ transform: 'rotateX(55deg) rotateZ(45deg)' }}>
-                  <div className="w-[100px] h-[100px] border border-primary/60 bg-primary/10 flex items-center justify-center shadow-[inset_0_0_20px_rgba(184,134,11,0.5)]">
-                     <Cpu size={32} className="text-primary transform -rotate-45 -rotate-x-[55deg] drop-shadow-[0_0_8px_rgba(184,134,11,0.8)]" />
+              {/* Middle Card */}
+              <Card className="absolute inset-0 shadow-2xl bg-[#111113]/90 backdrop-blur-md border border-neutral-800 rounded-2xl transform rotate-3 scale-95 translate-x-3 translate-y-2 opacity-70">
+              </Card>
+
+              {/* Front Card (Active) */}
+              <Card className="absolute inset-0 shadow-2xl bg-[#151518] border border-neutral-700 rounded-2xl flex flex-col p-6 z-10">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-purple-600 mb-4 p-[2px]">
+                  <div className="w-full h-full bg-surface rounded-full flex items-center justify-center">
+                    <Code size={24} className="text-primary" />
                   </div>
-               </div>
-               {/* Orbiting element 1 */}
-               <div className="absolute w-[250px] h-[250px] border border-neutral-700/50 rounded-full border-dashed animate-[spin_20s_linear_infinite]" style={{ transform: 'rotateX(70deg)' }}>
-                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-surface border border-primary/50 rounded-sm flex items-center justify-center" style={{ transform: 'rotateX(-70deg)' }}>
-                    <Code2 size={12} className="text-primary" />
-                 </div>
-               </div>
-               {/* Orbiting element 2 */}
-                <div className="absolute w-[350px] h-[350px] border border-neutral-800 rounded-full animate-[spin_30s_linear_infinite_reverse]" style={{ transform: 'rotateX(70deg)' }}>
-                 <div className="absolute top-1/2 -right-4 -translate-y-1/2 w-8 h-8 bg-surface border border-purple-500/50 rounded-full flex items-center justify-center" style={{ transform: 'rotateX(-70deg)' }}>
-                    <Rocket size={14} className="text-purple-400" />
-                 </div>
-               </div>
-            </div>
+                </div>
+                
+                <h3 className="font-display text-2xl font-bold text-neutral-50">Alex Chen</h3>
+                <p className="text-sm font-medium text-primary mb-4">Full Stack Developer</p>
+                
+                <p className="text-sm text-neutral-300 leading-relaxed mb-6">
+                  "Looking for a UI designer and an ML engineer to build an AI-powered health tracking app for the next hackathon."
+                </p>
 
-            {/* Floating UI Elements */}
-            <div className="relative w-full max-w-[500px] h-full z-30 pointer-events-none">
-              <Card className="absolute top-[25%] left-[5%] w-[280px] p-4 shadow-2xl bg-[#111113]/95 backdrop-blur-md border border-neutral-800 rounded-xl transform -rotate-2">
-                <div className="flex flex-col gap-2">
-                  <div className="h-2 w-1/3 bg-neutral-800 rounded-full"></div>
-                  <div className="h-2 w-full bg-neutral-800 rounded-full"></div>
-                  <div className="h-2 w-2/3 bg-neutral-800 rounded-full"></div>
-                  <div className="mt-2 h-16 w-full rounded border border-primary/20 bg-primary/5 flex items-center justify-center">
-                    <span className="text-[10px] text-primary/50 font-mono">Generating Architecture...</span>
+                <div className="flex flex-wrap gap-2 mb-8">
+                  <span className="px-2.5 py-1 text-[10px] font-medium tracking-wide uppercase bg-neutral-800 text-neutral-300 rounded border border-neutral-700">React</span>
+                  <span className="px-2.5 py-1 text-[10px] font-medium tracking-wide uppercase bg-neutral-800 text-neutral-300 rounded border border-neutral-700">Node.js</span>
+                  <span className="px-2.5 py-1 text-[10px] font-medium tracking-wide uppercase bg-neutral-800 text-neutral-300 rounded border border-neutral-700">Python</span>
+                </div>
+
+                <div className="mt-auto flex justify-between items-center px-4">
+                  <div className="w-12 h-12 rounded-full border border-semantic-danger/30 bg-semantic-danger/10 flex items-center justify-center text-semantic-danger shadow-[0_0_15px_rgba(239,68,68,0.15)]">
+                    <X size={20} strokeWidth={2.5} />
+                  </div>
+                  <div className="w-12 h-12 rounded-full border border-semantic-success/30 bg-semantic-success/10 flex items-center justify-center text-semantic-success shadow-[0_0_15px_rgba(34,197,94,0.15)]">
+                    <Heart size={20} strokeWidth={2.5} />
                   </div>
                 </div>
               </Card>
 
-               <Card className="absolute top-[65%] right-[10%] w-[220px] p-3 shadow-2xl bg-[#111113]/95 backdrop-blur-md border border-neutral-800 rounded-xl transform rotate-3">
-                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border border-green-500/50 bg-green-500/10 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-xs text-neutral-50">API Deployed</h4>
-                        <p className="text-[9px] text-neutral-400">Latency: 42ms</p>
-                    </div>
-                 </div>
-              </Card>
             </div>
           </motion.div>
 
           {/* Text Content (Slides from right) */}
           <div className="lg:col-span-5 flex flex-col items-start z-10 order-1 lg:order-2">
             <motion.span variants={textItem} className="text-primary font-bold tracking-widest text-[10px] mb-4 uppercase">
-              Build the Future
+              Find Your Team
             </motion.span>
+            
+            <motion.div variants={textItem} className="mb-2">
+              <span className="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
+                Tinder for Hackmates
+              </span>
+            </motion.div>
+            
             <motion.h2 variants={textItem} className="font-display text-4xl sm:text-5xl lg:text-5xl xl:text-6xl text-neutral-50 mb-6 leading-[1.1]">
-              Ideate, Code, and Ship Faster
+              Swipe Your Way to the <span className="text-primary">Right Team</span>
             </motion.h2>
+            
             <motion.p variants={textItem} className="text-neutral-400 text-sm sm:text-base mb-8 max-w-md leading-relaxed">
-              Use intelligent tools to accelerate your development process. Turn ideas into working prototypes in hours, not weeks.
+              Swipe through teammate profiles filtered by skills, interests, and hackathon goals. Match with people who complement your skillset to form a team fast — no cold DMs, no random Discord searching.
             </motion.p>
+            
             <motion.div variants={textItem}>
-              <Link to="/signup">
+              <Link to="/team-builder">
                 <Button variant="ghost" className="group rounded-full border border-neutral-700 hover:border-primary text-neutral-300 hover:text-primary transition-all">
-                  Start Building
+                  Find Teammates
                   <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
