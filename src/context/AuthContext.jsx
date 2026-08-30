@@ -84,6 +84,14 @@ export function AuthProvider({ children }) {
     return signup(name, email, password, 'student');
   };
 
+  const loginWithGithub = async () => {
+    const randomId = Date.now();
+    const name = `GitHub User ${randomId}`;
+    const email = `github_${randomId}@elevora.com`;
+    const password = "DemoPassword123!";
+    return signup(name, email, password, 'student');
+  };
+
   const logout = async () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user_id');
@@ -111,6 +119,7 @@ export function AuthProvider({ children }) {
     signup,
     login,
     loginWithGoogle,
+    loginWithGithub,
     logout,
     completeOnboarding,
     isMock: USE_MOCK

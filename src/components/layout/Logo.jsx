@@ -37,7 +37,7 @@ export function Logo({ className, size = 'md', hideText = false, fullLockup = fa
   }
 
   return (
-    <Link to="/" className={cn("flex items-center gap-3 transition-opacity hover:opacity-90", className)}>
+    <Link to="/" className={cn("flex transition-opacity hover:opacity-90", size === 'xl' ? "flex-col items-start gap-4" : "items-center gap-3", className)}>
       <LogoMark className={sizes[size]} />
       {!hideText && (
         <span className={cn("font-display font-normal tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-neutral-50 to-neutral-400 uppercase", textSizes[size])}>
