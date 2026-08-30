@@ -39,7 +39,7 @@ export function Login() {
       } else {
         await login(email, password);
       }
-      navigate('/team-builder');
+      navigate('/hackathons');
     } catch (err) {
       console.error(err);
       if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
@@ -56,7 +56,7 @@ export function Login() {
     try {
       setError(null);
       await loginWithGoogle();
-      navigate('/team-builder');
+      navigate('/hackathons');
     } catch (err) {
       console.error(err);
       setError('Failed to log in with Google.');
@@ -67,7 +67,7 @@ export function Login() {
     try {
       setError(null);
       await loginWithGithub();
-      navigate('/team-builder');
+      navigate('/hackathons');
     } catch (err) {
       console.error(err);
       setError('Failed to log in with GitHub.');
