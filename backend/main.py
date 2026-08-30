@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.database import engine, Base
 from backend.models import db_models, trust_models
-from backend.routers import auth, users, teams, matches, verification
+from backend.routers import auth, users, teams, matches, verification, settings, account
 
 # Ensure DB tables are created
 Base.metadata.create_all(bind=engine)
@@ -33,6 +33,8 @@ app.include_router(users.router)
 app.include_router(teams.router)
 app.include_router(matches.router)
 app.include_router(verification.router)
+app.include_router(settings.router)
+app.include_router(account.router)
 
 @app.get("/api/v1/health")
 def health_check():

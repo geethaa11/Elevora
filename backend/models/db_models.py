@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, UniqueConstraint, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from backend.database import Base
@@ -16,6 +16,25 @@ class User(Base):
 
     profile = relationship("StudentProfile", back_populates="user", uselist=False)
     verification = relationship("UserVerification", back_populates="user", uselist=False)
+    settings = relationship("UserSettings", back_populates="user", uselist=False)
+
+class UserSettings(Base):
+    __tablename__ = "user_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    email_notifications = Column(Boolean, default=True)
+    team_notifications = Column(Boolean, default=True)
+    hackathon_notifications = Column(Boolean, default=True)
+    match_notifications = Column(Boolean, default=True)
+    profile_visibility = Column(String, default="public")
+    show_email = Column(Boolean, default=False)
+    show_contact = Column(Boolean, default=False)
+    theme = Column(String, default="system")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="settings")
 
 class StudentProfile(Base):
     __tablename__ = "student_profiles"
