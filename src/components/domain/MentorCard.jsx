@@ -12,7 +12,7 @@ export function MentorCard({ mentor, kind }) {
   return (
     <article className="flex flex-col gap-3 rounded-xl border border-neutral-700 bg-surface p-4 shadow-sm transition-all hover:border-primary/40">
       <div className="flex items-start gap-3">
-        <Avatar name={mentor.name} />
+        <Avatar name={mentor.name} src={mentor.avatar} />
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-display text-base font-bold text-neutral-50">{mentor.name}</h3>
           <p className="text-sm text-neutral-400">{mentor.expertise}</p>
