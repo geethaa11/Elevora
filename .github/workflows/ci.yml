@@ -35,5 +35,5 @@ jobs:
       if: steps.check_lint.outputs.has_lint == 'true'
       run: npm run lint
       
-    - name: Build
-      run: npm run build
+  - name: Build
+  run: npm run build
