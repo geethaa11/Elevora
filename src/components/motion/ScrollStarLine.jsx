@@ -68,32 +68,63 @@ export function ScrollStarLine() {
   if (shouldReduceMotion) return null;
 
   return (
-    <div className="absolute right-4 top-0 w-8 h-full pointer-events-none z-[48] overflow-visible opacity-50 hidden md:block">
+    <div className="absolute right-0 top-0 w-24 md:w-48 h-full pointer-events-none z-[48] hidden lg:block overflow-visible">
       <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 1000">
         <defs>
-          <filter id="gold-glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <filter id="comet-glow" x="-200%" y="-200%" width="500%" height="500%">
+            {/* Gold core blur */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="coreGlow"/>
+            
+            {/* Purple trailing tail (blurred and offset up/back) */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="tailBlur"/>
+            <feOffset in="tailBlur" dx="0" dy="-12" result="tailOffset"/>
+            <feColorMatrix in="tailOffset" type="matrix" values="
+              0 0 0 0 0.427
+              0 0 0 0 0.157
+              0 0 0 0 0.851
+              0 0 0 0.8 0" result="purpleTail"/>
+              
+            {/* Secondary longer gold tail */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="longTailBlur"/>
+            <feOffset in="longTailBlur" dx="0" dy="-25" result="longTailOffset"/>
+            <feColorMatrix in="longTailOffset" type="matrix" values="
+              0 0 0 0 0.72
+              0 0 0 0 0.52
+              0 0 0 0 0.04
+              0 0 0 0.4 0" result="goldTail"/>
+
             <feMerge>
-              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="goldTail"/>
+              <feMergeNode in="purpleTail"/>
+              <feMergeNode in="coreGlow"/>
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
           </filter>
         </defs>
+        
         <path 
           ref={pathRef}
-          d="M 50,0 Q 90,100 50,200 T 50,400 T 50,600 T 50,800 T 50,1000"
+          d="M 20,0 
+             C 90,80 90,120 40,200 
+             C -10,280 -10,320 40,400 
+             C 90,480 90,520 40,600 
+             C -10,680 -10,720 40,800 
+             C 90,880 90,920 40,1000"
           fill="none" 
           stroke="#B8860B" 
-          strokeWidth="1.5"
+          strokeWidth="1"
+          strokeDasharray="4 6"
+          strokeOpacity="0.4"
           vectorEffect="non-scaling-stroke"
         />
+        
         <circle 
           ref={dotRef}
-          cx="50" 
+          cx="20" 
           cy="0" 
-          r="4" 
+          r="3" 
           fill="#FFF" 
-          filter="url(#gold-glow)"
+          filter="url(#comet-glow)"
         />
       </svg>
     </div>
