@@ -14,6 +14,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { Onboarding } from './pages/Onboarding';
 import { Home } from './pages/Home';
 import { Profile } from './pages/Profile';
+import { Settings } from './pages/Settings';
 
 // Frontend B Feature Components
 import { HackathonExplorer } from './features/hackathons/HackathonExplorer';
@@ -78,6 +79,7 @@ function App() {
             >
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
 
               {/* Hackathon Explorer */}
               <Route path="/hackathons" element={<HackathonExplorer />} />
