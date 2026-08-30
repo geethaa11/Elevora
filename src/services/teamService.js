@@ -1,5 +1,6 @@
 const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://elevora-m1d3.onrender.com';
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -16,9 +17,24 @@ async function handleResponse(response) {
 
     try {
       const data = await response.json();
-      message = data.detail || data.message || message;
+
+      if (Array.isArray(data.detail)) {
+        message = data.detail
+          .map(
+            (err) =>
+              `${err.loc?.join('.') || 'field'}: ${
+                err.msg || 'Invalid value'
+              }`
+          )
+          .join(', ');
+      } else {
+        message =
+          data.detail ||
+          data.message ||
+          message;
+      }
     } catch {
-      // Keep default message
+      // Keep default error message
     }
 
     const error = new Error(message);
@@ -29,7 +45,14 @@ async function handleResponse(response) {
   return response.json();
 }
 
-export async function getTeamMatches(userId, limit = 10, offset = 0) {
+/**
+ * Get recommended students for the logged-in user.
+ */
+export async function getTeamMatches(
+  userId,
+  limit = 10,
+  offset = 0
+) {
   if (!userId) {
     throw new Error('User ID is required');
   }
@@ -45,6 +68,9 @@ export async function getTeamMatches(userId, limit = 10, offset = 0) {
   return handleResponse(response);
 }
 
+/**
+ * Record an interested/pass swipe.
+ */
 export async function swipeAction(swipedId, action) {
   if (!swipedId) {
     throw new Error('Student ID is required');
@@ -61,10 +87,24 @@ export async function swipeAction(swipedId, action) {
       headers: getHeaders(),
       body: JSON.stringify({
         swiped_id: swipedId,
-        action
+        action: action
       })
     }
   );
 
   return handleResponse(response);
+}
+
+/**
+ * Convenience function for Interested swipe.
+ */
+export async function markInterested(swipedId) {
+  return swipeAction(swipedId, 'interested');
+}
+
+/**
+ * Convenience function for Pass swipe.
+ */
+export async function markPass(swipedId) {
+  return swipeAction(swipedId, 'pass');
 }
