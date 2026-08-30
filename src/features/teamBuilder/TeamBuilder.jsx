@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { getTeamMatches, swipeAction } from "../../services/teamService.js";
 import { SwipeCard } from "./SwipeCard.jsx";
@@ -6,37 +6,78 @@ import { Loader2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 
 export function TeamBuilder() {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [swipeError, setSwipeError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  
+  const offsetRef = useRef(0);
+
+  const fetchMatches = async (isInitial = false) => {
+    if (!currentUser?.uid || !hasMore) return;
+    try {
+      if (isInitial) setLoading(true);
+      else setLoadingMore(true);
+      
+      const limit = 10;
+      const data = await getTeamMatches(currentUser.uid, limit, offsetRef.current);
+      
+      if (data.length < limit) {
+        setHasMore(false);
+      }
+      
+      if (data.length > 0) {
+        setMatches((prev) => {
+          const newMatches = data.filter(d => !prev.some(p => p.user_id === d.user_id));
+          return [...prev, ...newMatches];
+        });
+        offsetRef.current += limit;
+      }
+    } catch (err) {
+      if (err.message === "Unauthorized" || err.status === 401) {
+        logout();
+        return;
+      }
+      if (isInitial) setError(err.message || "Failed to load recommendations");
+      else setSwipeError("Failed to load more recommendations.");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchMatches() {
-      if (!currentUser?.uid) return;
-      try {
-        setLoading(true);
-        const data = await getTeamMatches(currentUser.uid);
-        setMatches(data);
-      } catch (err) {
-        setError(err.message || "Failed to load recommendations");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchMatches();
+    setMatches([]);
+    setHasMore(true);
+    offsetRef.current = 0;
+    fetchMatches(true);
   }, [currentUser]);
+
+  // Trigger fetch when running low on cards
+  useEffect(() => {
+    if (matches.length <= 3 && hasMore && !loading && !loadingMore) {
+      fetchMatches(false);
+    }
+  }, [matches.length, hasMore, loading, loadingMore]);
 
   const handleSwipe = async (action, student) => {
     setSwipeError(null);
     try {
       await swipeAction(student.user_id, action);
-      // On success, pop the card
       setMatches((prev) => prev.slice(1));
     } catch (err) {
-      // Do not remove the card, show error
-      setSwipeError(`Failed to ${action} ${student.name}. Please try again.`);
+      if (err.status === 409) {
+        // Treat 409 Conflict as success (already swiped)
+        setMatches((prev) => prev.slice(1));
+      } else if (err.status === 401 || err.message === "Unauthorized") {
+        logout();
+      } else {
+        setSwipeError(`Failed to ${action} ${student.name}. Please try again.`);
+        throw err; // Re-throw to allow SwipeCard to snap back
+      }
     }
   };
 
@@ -44,16 +85,16 @@ export function TeamBuilder() {
     if (matches.length === 0) return;
     const currentStudent = matches[0];
     if (e.key === "ArrowRight") {
-      handleSwipe("interested", currentStudent);
+      handleSwipe("interested", currentStudent).catch(() => {});
     } else if (e.key === "ArrowLeft") {
-      handleSwipe("pass", currentStudent);
+      handleSwipe("pass", currentStudent).catch(() => {});
     }
   };
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [matches]);
+  }, [matches, hasMore, loadingMore]);
 
   if (loading) {
     return (
@@ -83,7 +124,7 @@ export function TeamBuilder() {
       <header className="flex flex-col gap-1 text-center shrink-0">
         <h1 className="font-display text-3xl font-bold text-neutral-50">Find Your Teammates</h1>
         <p className="text-sm text-neutral-400">
-          Swipe right if you're interested, left to pass.
+          Find teammates who complement your skills, interests, and role.
         </p>
       </header>
 
@@ -110,8 +151,8 @@ export function TeamBuilder() {
           </AnimatePresence>
         ) : (
           <div className="flex flex-col items-center gap-4 p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl w-full">
-            <h3 className="text-xl font-bold text-neutral-200">No more recommendations</h3>
-            <p className="text-neutral-400">We've shown you all available students right now. Check back later!</p>
+            <h3 className="text-xl font-bold text-neutral-200">No more teammates to discover</h3>
+            <p className="text-neutral-400">You have reviewed all current recommendations. Check back later!</p>
           </div>
         )}
       </div>

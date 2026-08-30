@@ -10,12 +10,15 @@ function getHeaders() {
   };
 }
 
-export async function getTeamMatches(userId) {
-  const response = await fetch(`${BASE_URL}/api/v1/team-matches/${userId}`, {
+export async function getTeamMatches(userId, limit = 10, offset = 0) {
+  const response = await fetch(`${BASE_URL}/api/v1/team-matches/${userId}?limit=${limit}&offset=${offset}`, {
     method: 'GET',
     headers: getHeaders()
   });
   if (!response.ok) {
+    if (response.status === 401) throw new Error('Unauthorized');
+    if (response.status === 403) throw new Error('Forbidden');
+    if (response.status === 404) throw new Error('Not found');
     throw new Error('Failed to fetch matches');
   }
   return response.json();
@@ -28,7 +31,9 @@ export async function swipeAction(swipedId, action) {
     body: JSON.stringify({ swiped_id: swipedId, action: action })
   });
   if (!response.ok) {
-    throw new Error(`Failed to record ${action}`);
+    const err = new Error(`Failed to record ${action}`);
+    err.status = response.status;
+    throw err;
   }
   return response.json();
 }

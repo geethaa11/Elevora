@@ -102,7 +102,7 @@ def test_excluded_from_recommendations():
     db.close()
     
     # Check that they appear
-    response = client.get(f"/api/v1/team-matches/{u1_id}", headers={"Authorization": f"Bearer {u1_token}"})
+    response = client.get(f"/api/v1/team-matches/{u1_id}?limit=100", headers={"Authorization": f"Bearer {u1_token}"})
     matches_before = {m["user_id"] for m in response.json()}
     
     # Ensure they are present
@@ -114,7 +114,7 @@ def test_excluded_from_recommendations():
     client.post("/api/v1/team-matches/pass", headers={"Authorization": f"Bearer {u1_token}"}, json={"swiped_id": u3_id, "action": "pass"})
     
     # Check they are gone
-    response = client.get(f"/api/v1/team-matches/{u1_id}", headers={"Authorization": f"Bearer {u1_token}"})
+    response = client.get(f"/api/v1/team-matches/{u1_id}?limit=100", headers={"Authorization": f"Bearer {u1_token}"})
     matches_after = {m["user_id"] for m in response.json()}
     
     assert u2_id not in matches_after
