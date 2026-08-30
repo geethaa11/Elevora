@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
-import { Menu, X, Sparkles } from 'lucide-react';
 
 export function Navbar() {
   const { currentUser, logout } = useAuth();
@@ -11,7 +10,6 @@ export function Navbar() {
   const isHome = location.pathname === '/';
   
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,144 +19,75 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { label: 'Home', path: '/', isHash: true, id: 'home' },
-    { label: 'Hackathons', path: '/hackathons', isHash: false },
-    { label: 'Team Builder', path: '/team-builder', isHash: false },
-    { label: 'Mentors', path: '/mentors', isHash: false },
-  ];
-
-  const handleNavClick = (e, link) => {
-    if (isHome && link.isHash && link.id) {
+  const handleNavClick = (e, targetId) => {
+    if (isHome) {
       e.preventDefault();
-      document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
     }
-    setMobileMenuOpen(false);
   };
+
+  const navLinks = [
+    { label: 'Features', id: 'discover' },
+    { label: 'How It Works', id: 'build' },
+    { label: 'For Students', id: 'grow' },
+    { label: 'Mentors', id: 'mentors' },
+    { label: 'About Us', id: 'home' },
+  ];
 
   return (
     <nav 
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300",
-        scrolled || !isHome
-          ? "border-b border-neutral-800 bg-[#0D0D0F]/90 backdrop-blur-md py-3 shadow-xl" 
+        "fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300",
+        scrolled 
+          ? "border-b border-neutral-700 bg-background/80 backdrop-blur-md py-3" 
           : "bg-transparent py-5"
       )}
     >
       <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        
-        {/* Brand Logo */}
         <div className="flex items-center">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#996515] via-[#D4AF37] to-[#FDE08B] flex items-center justify-center shadow-[0_0_15px_rgba(212,175,55,0.4)] group-hover:scale-105 transition-transform">
-              <Sparkles className="w-4 h-4 text-black font-bold" />
-            </div>
-            <span className="font-display text-xl font-black tracking-widest text-neutral-50 group-hover:text-primary transition-colors">
+          <Link to="/" className="flex items-center gap-2 group">
+            <span className="font-display text-2xl font-bold tracking-widest text-primary drop-shadow-[0_0_10px_rgba(184,134,11,0.5)]">
               ELEVORA
             </span>
           </Link>
         </div>
         
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Center Links (Desktop only) */}
+        <div className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
-            <Link 
+            <a 
               key={link.label}
-              to={link.path}
-              onClick={(e) => handleNavClick(e, link)}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                location.pathname === link.path ? "text-primary font-semibold" : "text-neutral-300"
-              )}
+              href={`#${link.id}`}
+              onClick={(e) => handleNavClick(e, link.id)}
+              className="text-sm font-medium text-neutral-200 hover:text-primary transition-colors"
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </div>
 
-        {/* Right CTA Buttons */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="flex items-center gap-4">
           {currentUser ? (
             <>
               <Link to="/home">
-                <Button variant="ghost" className="text-neutral-200 hover:text-white">
-                  Dashboard
-                </Button>
+                <Button variant="ghost">Dashboard</Button>
               </Link>
-              <Button variant="secondary" size="sm" onClick={() => logout()} className="border-neutral-700">
+              <Button variant="secondary" onClick={() => logout()}>
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Link to="/login">
-                <Button variant="ghost" className="text-neutral-300 hover:text-white">
-                  Login
-                </Button>
+              <Link to="/login" className="hidden sm:block">
+                <Button variant="ghost">Log in</Button>
               </Link>
               <Link to="/login">
-                <Button variant="primary" size="sm" className="rounded-full px-5 font-semibold bg-gradient-to-r from-[#D4AF37] to-[#996515] text-black border-none shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:opacity-95">
-                  Get Started
-                </Button>
+                <Button variant="primary">Get Started</Button>
               </Link>
             </>
           )}
         </div>
-
-        {/* Mobile Hamburger Button */}
-        <div className="md:hidden flex items-center">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-neutral-300 hover:text-white focus:outline-none"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
       </div>
-
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-neutral-800 bg-[#0D0D0F]/95 backdrop-blur-xl px-4 pt-3 pb-6 flex flex-col gap-4 shadow-2xl animate-in slide-in-from-top-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              to={link.path}
-              onClick={(e) => handleNavClick(e, link)}
-              className="text-base font-medium text-neutral-200 hover:text-primary py-2 border-b border-neutral-800/50"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="flex flex-col gap-3 pt-2">
-            {currentUser ? (
-              <>
-                <Link to="/home" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">
-                    Dashboard
-                  </Button>
-                </Link>
-                <Button variant="secondary" onClick={() => { logout(); setMobileMenuOpen(false); }} className="w-full">
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full text-center">
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="primary" className="w-full text-center bg-gradient-to-r from-[#D4AF37] to-[#996515] text-black">
-                    Get Started
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </nav>
   );
 }
