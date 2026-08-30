@@ -14,3 +14,7 @@ class AuthResponse(BaseModel):
     token: str
     user_id: int
     role: str
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str

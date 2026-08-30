@@ -1,13 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup
-} from 'firebase/auth';
-import { auth } from '../firebase';
+import { loginApi, signupApi, getUserProfile, submitOnboarding } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -16,84 +8,101 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Toggle this or rely on Firebase config validity to use mock auth
-  const USE_MOCK = import.meta.env.VITE_USE_MOCK_AUTH === 'true' || auth.app.options.apiKey === 'demo-api-key';
+  const [currentUser, setCurrentUser] = useState(undefined); // undefined means loading
+  
+  // We can still expose a mock flag if some components depend on it, 
+  // but now we're using real backend
+  const USE_MOCK = false;
 
   useEffect(() => {
-    if (USE_MOCK) {
-      // Use LocalStorage mock auth
-      const mockUser = localStorage.getItem('elevora_mock_user');
-      if (mockUser) {
-        setCurrentUser(JSON.parse(mockUser));
-      }
-      setLoading(false);
-      return;
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('user_id');
+    
+    if (token && userId) {
+      getUserProfile(userId).then(user => {
+        setCurrentUser({
+          uid: user.id,
+          email: user.email,
+          displayName: user.name,
+          role: user.role,
+          completedOnboarding: !!user.profile,
+          ...user.profile
+        });
+      }).catch(err => {
+        console.error("Session expired or invalid", err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_id');
+        setCurrentUser(null);
+      });
+    } else {
+      setCurrentUser(null);
     }
-
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, [USE_MOCK]);
+  }, []);
 
   const signup = async (email, password) => {
-    if (USE_MOCK) {
-      const newUser = { uid: Date.now().toString(), email, displayName: email.split('@')[0], completedOnboarding: false };
-      localStorage.setItem('elevora_mock_user', JSON.stringify(newUser));
-      setCurrentUser(newUser);
-      return newUser;
-    }
-    return createUserWithEmailAndPassword(auth, email, password);
+    const name = email.split('@')[0];
+    const data = await signupApi(name, email, password, 'student');
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user_id', data.user_id);
+    
+    const user = {
+      uid: data.user_id,
+      email,
+      displayName: name,
+      role: data.role,
+      completedOnboarding: false
+    };
+    setCurrentUser(user);
+    return user;
   };
 
   const login = async (email, password) => {
-    if (USE_MOCK) {
-      // Accept any login for demo
-      const user = { uid: 'mock-123', email, displayName: email.split('@')[0], completedOnboarding: true };
-      localStorage.setItem('elevora_mock_user', JSON.stringify(user));
-      setCurrentUser(user);
-      return user;
-    }
-    return signInWithEmailAndPassword(auth, email, password);
+    const data = await loginApi(email, password);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user_id', data.user_id);
+    
+    const userProfile = await getUserProfile(data.user_id);
+    
+    const user = {
+      uid: userProfile.id,
+      email: userProfile.email,
+      displayName: userProfile.name,
+      role: userProfile.role,
+      completedOnboarding: !!userProfile.profile,
+      ...userProfile.profile
+    };
+    setCurrentUser(user);
+    return user;
   };
 
   const loginWithGoogle = async () => {
-    if (USE_MOCK) {
-      const user = { uid: 'mock-google', email: 'demo@google.com', displayName: 'Demo User', completedOnboarding: true };
-      localStorage.setItem('elevora_mock_user', JSON.stringify(user));
-      setCurrentUser(user);
-      return user;
-    }
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+    // For the "Mock Signup (Demo)" button, generate a mock credential
+    // and try to sign up or log in
+    const email = `demo_${Date.now()}@elevora.com`;
+    const password = "DemoPassword123!";
+    return signup(email, password);
   };
 
   const logout = async () => {
-    if (USE_MOCK) {
-      localStorage.removeItem('elevora_mock_user');
-      setCurrentUser(null);
-      return;
-    }
-    return signOut(auth);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    setCurrentUser(null);
   };
 
-  const completeOnboarding = (userData) => {
-    if (USE_MOCK) {
-      const updatedUser = { ...currentUser, ...userData, completedOnboarding: true };
-      localStorage.setItem('elevora_mock_user', JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser);
-      return updatedUser;
+  const completeOnboarding = async (userData) => {
+    if (currentUser?.uid) {
+      const result = await submitOnboarding(currentUser.uid, userData);
+      if (result.success) {
+        const updatedUser = { 
+          ...currentUser, 
+          ...result.profile, 
+          completedOnboarding: true 
+        };
+        setCurrentUser(updatedUser);
+        return updatedUser;
+      }
     }
-    // For real firebase, this would update Firestore profile
-    // Just mock it here since we are client SDK only right now
-    const updatedUser = { ...currentUser, ...userData, completedOnboarding: true };
-    setCurrentUser(updatedUser);
-    return updatedUser;
+    return currentUser;
   };
 
   const value = {
@@ -108,7 +117,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {currentUser !== undefined && children}
     </AuthContext.Provider>
   );
 }

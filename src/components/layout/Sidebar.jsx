@@ -62,7 +62,7 @@ export function Sidebar({ className }) {
         </NavLink>
 
         <NavLink
-          to="/profile"
+          to="/settings"
           className={({ isActive }) => cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
             isActive 

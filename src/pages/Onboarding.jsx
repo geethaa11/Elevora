@@ -8,8 +8,8 @@ export function Onboarding() {
   const { completeOnboarding } = useAuth();
   const navigate = useNavigate();
 
-  const handleComplete = () => {
-    completeOnboarding({ skills: ['React', 'Firebase'] });
+  const handleComplete = async () => {
+    await completeOnboarding({ skills: ['React', 'Firebase'] });
     navigate('/home');
   };
 
