@@ -76,3 +76,13 @@ class TeamMember(Base):
     joined_at = Column(DateTime, default=datetime.utcnow)
 
     team = relationship("Team", back_populates="members")
+
+class SwipeAction(Base):
+    __tablename__ = "swipe_actions"
+    __table_args__ = (UniqueConstraint('swiper_id', 'swiped_id', name='_swiper_swiped_uc'),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    swiper_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    swiped_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    action = Column(String, nullable=False) # 'interested' or 'pass'
+    created_at = Column(DateTime, default=datetime.utcnow)

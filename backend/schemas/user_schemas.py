@@ -25,3 +25,7 @@ class MatchResponse(BaseModel):
     match_score: float
     shared_skills: List[str]
     shared_interests: List[str]
+
+class SwipeRequest(BaseModel):
+    swiped_id: int
+    action: str

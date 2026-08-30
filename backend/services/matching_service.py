@@ -1,7 +1,7 @@
 import json
 import logging
 from sqlalchemy.orm import Session
-from backend.models.db_models import User
+from backend.models.db_models import User, SwipeAction
 from backend.database_neo4j import NEO4J_ENABLED, is_neo4j_available
 from backend.services.neo4j_service import get_matches as get_neo4j_matches
 
@@ -16,30 +16,30 @@ def safe_json_load(field_val):
     except (ValueError, TypeError):
         return []
 
-def get_matches_for_user(db: Session, user_id: int):
+def get_matches_for_user(db: Session, user_id: int, limit: int = 10, offset: int = 0):
     target_user = db.query(User).filter(User.id == user_id).first()
     if not target_user or not target_user.profile:
         return []
+
+    # Get users already swiped on
+    swipes = db.query(SwipeAction.swiped_id).filter(SwipeAction.swiper_id == user_id).all()
+    swiped_ids = {s[0] for s in swipes}
 
     # 1. Attempt Neo4j matching if enabled and available
     if NEO4J_ENABLED and is_neo4j_available:
         try:
             neo4j_results = get_neo4j_matches(user_id)
             if neo4j_results is not None:
-                # We need to hydrate Neo4j results with SQLite profile data (e.g., name, teaming_preference)
-                # and filter out users who are already in a team if we want to mimic exact SQLite behavior.
                 hydrated_matches = []
                 for match in neo4j_results:
+                    if match["user_id"] in swiped_ids:
+                        continue
+                        
                     other = db.query(User).filter(User.id == match["user_id"]).first()
                     if not other or not other.profile:
                         continue
                     
                     is_available = (other.profile.teaming_preference != "has-team")
-                    
-                    # We only add the same base score modifiers from Neo4j (skills/interests). 
-                    # We can add role/hackathon modifiers on top here if we want full parity,
-                    # but since the prompt says "Neo4j should improve candidate discovery... while SQLite remains the reliable fallback"
-                    # we will just add role/hackathon logic here to keep score consistent.
                     
                     a_role = target_user.profile.preferred_role or ""
                     b_role = other.profile.preferred_role or ""
@@ -65,18 +65,20 @@ def get_matches_for_user(db: Session, user_id: int):
                 hydrated_matches.sort(key=lambda x: (x["_available"], x["match_score"]), reverse=True)
                 for m in hydrated_matches:
                     del m["_available"]
-                return hydrated_matches[:10]
+                return hydrated_matches[offset : offset + limit]
         except Exception as e:
             logger.error(f"Neo4j matching failed, falling back to SQLite: {e}")
 
     # 2. SQLite Fallback (Original Implementation)
     target_prof = target_user.profile
     
-    # Get all other students
     other_users = db.query(User).filter(User.id != user_id, User.role == 'student').all()
     
     matches = []
     for other in other_users:
+        if other.id in swiped_ids:
+            continue
+            
         if not other.profile:
             continue
             
@@ -120,4 +122,4 @@ def get_matches_for_user(db: Session, user_id: int):
     for m in matches:
         del m["_available"]
         
-    return matches[:10]
+    return matches[offset : offset + limit]

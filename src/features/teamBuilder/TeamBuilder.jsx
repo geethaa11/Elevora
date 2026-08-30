@@ -1,89 +1,120 @@
-import React, { useMemo, useState } from "react";
-import { students } from "../../data/students.js";
-import { SearchBar } from "../../components/domain/SearchBar.jsx";
-import { Select } from "../../components/ui/Select.jsx";
-import { StudentCard } from "../../components/domain/StudentCard.jsx";
-import { EmptyState } from "../../components/domain/States.jsx";
-import { useAppState } from "../../context/AppStateContext.jsx";
-
-import { Shared3CardCarousel } from "../../components/ui/Shared3CardCarousel.jsx";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { getTeamMatches, swipeAction } from "../../services/teamService.js";
+import { SwipeCard } from "./SwipeCard.jsx";
+import { Loader2 } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 
 export function TeamBuilder() {
-  const { selectedHackathon, addTeamMember } = useAppState();
-  const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState({ role: "", skill: "", availability: "" });
+  const { currentUser } = useAuth();
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [swipeError, setSwipeError] = useState(null);
 
-  const facets = useMemo(
-    () => ({
-      roles: [...new Set(students.map((s) => s.role))].sort(),
-      skills: [...new Set(students.flatMap((s) => s.skills))].sort(),
-      availabilities: [...new Set(students.map((s) => s.availability))],
-    }),
-    []
-  );
+  useEffect(() => {
+    async function fetchMatches() {
+      if (!currentUser?.uid) return;
+      try {
+        setLoading(true);
+        const data = await getTeamMatches(currentUser.uid);
+        setMatches(data);
+      } catch (err) {
+        setError(err.message || "Failed to load recommendations");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMatches();
+  }, [currentUser]);
 
-  const filtered = students.filter((s) => {
-    const q = query.trim().toLowerCase();
-    if (q && !`${s.name} ${s.role} ${s.skills.join(" ")}`.toLowerCase().includes(q)) return false;
-    if (filters.role && s.role !== filters.role) return false;
-    if (filters.skill && !s.skills.includes(filters.skill)) return false;
-    if (filters.availability && s.availability !== filters.availability) return false;
-    return true;
-  });
+  const handleSwipe = async (action, student) => {
+    setSwipeError(null);
+    try {
+      await swipeAction(student.user_id, action);
+      // On success, pop the card
+      setMatches((prev) => prev.slice(1));
+    } catch (err) {
+      // Do not remove the card, show error
+      setSwipeError(`Failed to ${action} ${student.name}. Please try again.`);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (matches.length === 0) return;
+    const currentStudent = matches[0];
+    if (e.key === "ArrowRight") {
+      handleSwipe("interested", currentStudent);
+    } else if (e.key === "ArrowLeft") {
+      handleSwipe("pass", currentStudent);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [matches]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto flex max-w-lg flex-col gap-8 py-12 items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <p className="text-neutral-400">Finding best matches for you...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto flex max-w-lg flex-col gap-8 py-12 items-center justify-center min-h-[60vh]">
+        <p className="text-red-400">Error: {error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-neutral-800 rounded-md text-neutral-300"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8 py-4">
-      <header className="flex flex-col gap-1">
+    <div className="mx-auto flex max-w-lg flex-col gap-8 py-4 h-[calc(100vh-8rem)] relative">
+      <header className="flex flex-col gap-1 text-center shrink-0">
         <h1 className="font-display text-3xl font-bold text-neutral-50">Find Your Teammates</h1>
         <p className="text-sm text-neutral-400">
-          Build a team with people whose skills complement yours.
-          {selectedHackathon && <span className="text-primary font-semibold"> Building for {selectedHackathon.name}.</span>}
+          Swipe right if you're interested, left to pass.
         </p>
       </header>
 
-      <div className="flex flex-col gap-3">
-        <SearchBar value={query} onChange={setQuery} placeholder="Search by skills, role or name..." />
-        <div className="flex flex-wrap gap-2.5">
-          <Select value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value })}>
-            <option value="">All Roles</option>
-            {facets.roles.map((r) => (
-              <option key={r} value={r}>{r}</option>
-            ))}
-          </Select>
-
-          <Select value={filters.skill} onChange={(e) => setFilters({ ...filters, skill: e.target.value })}>
-            <option value="">All Skills</option>
-            {facets.skills.map((sk) => (
-              <option key={sk} value={sk}>{sk}</option>
-            ))}
-          </Select>
-
-          <Select value={filters.availability} onChange={(e) => setFilters({ ...filters, availability: e.target.value })}>
-            <option value="">All Availability</option>
-            {facets.availabilities.map((av) => (
-              <option key={av} value={av}>{av}</option>
-            ))}
-          </Select>
+      {swipeError && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500/20 text-red-300 border border-red-500/50 px-4 py-2 rounded-lg text-sm font-medium shadow-lg transition-all">
+          {swipeError}
         </div>
-      </div>
-
-      {filtered.length === 0 ? (
-        <EmptyState 
-          message={
-            query || Object.values(filters).some(Boolean)
-              ? "No compatible teammates match your filters."
-              : "No teammates available yet — check back soon."
-          } 
-        />
-      ) : (
-        <Shared3CardCarousel
-          title="Teammate Recommendations"
-          items={filtered}
-          renderCard={(student) => (
-            <StudentCard student={student} onConnect={addTeamMember} />
-          )}
-        />
       )}
+
+      <div className="relative flex-1 w-full flex justify-center items-center">
+        {matches.length > 0 ? (
+          <AnimatePresence>
+            {matches.map((student, index) => {
+              if (index > 1) return null; // Only render top 2 cards
+              return (
+                <SwipeCard
+                  key={student.user_id}
+                  student={student}
+                  isFront={index === 0}
+                  onSwipe={handleSwipe}
+                />
+              );
+            }).reverse()}
+          </AnimatePresence>
+        ) : (
+          <div className="flex flex-col items-center gap-4 p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl w-full">
+            <h3 className="text-xl font-bold text-neutral-200">No more recommendations</h3>
+            <p className="text-neutral-400">We've shown you all available students right now. Check back later!</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
