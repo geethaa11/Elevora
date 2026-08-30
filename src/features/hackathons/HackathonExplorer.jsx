@@ -152,7 +152,13 @@ export function HackathonExplorer() {
       {loading ? (
         <LoadingState />
       ) : sorted.length === 0 ? (
-        <EmptyState message="No hackathons match your filters." />
+        <EmptyState 
+          message={
+            query || Object.values(filters).some(Boolean) || quickFilter !== "all" 
+              ? "No hackathons match your filters." 
+              : "No hackathons yet — check back soon."
+          } 
+        />
       ) : (
         <div className="flex flex-col gap-10">
           {SECTION_ORDER.map((sectionId) => {

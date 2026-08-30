@@ -66,7 +66,13 @@ export function TeamBuilder() {
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState message="No compatible teammates found." />
+        <EmptyState 
+          message={
+            query || Object.values(filters).some(Boolean)
+              ? "No compatible teammates match your filters."
+              : "No teammates available yet — check back soon."
+          } 
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((s) => (

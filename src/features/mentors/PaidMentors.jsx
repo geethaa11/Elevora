@@ -52,7 +52,13 @@ export function PaidMentors() {
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState message="No experts match your filters." />
+        <EmptyState 
+          message={
+            query || Object.values(filters).some(Boolean)
+              ? "No expert mentors match your filters."
+              : "No expert mentors available right now — check back soon."
+          } 
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((m) => (

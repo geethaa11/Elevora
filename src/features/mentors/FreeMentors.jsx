@@ -52,7 +52,13 @@ export function FreeMentors() {
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState message="No volunteer mentors available right now." />
+        <EmptyState 
+          message={
+            query || Object.values(filters).some(Boolean)
+              ? "No volunteer mentors match your filters."
+              : "No volunteer mentors available right now — check back soon."
+          } 
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((m) => (
