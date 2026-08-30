@@ -8,7 +8,7 @@ function hashToIndex(str) {
   return Math.abs(h);
 }
 
-export function Avatar({ name = "", size = 44 }) {
+export function Avatar({ name = "", size = 44, src = "" }) {
   const initials = name
     ? name
         .split(" ")
@@ -18,6 +18,17 @@ export function Avatar({ name = "", size = 44 }) {
         .toUpperCase()
     : "U";
   const color = COLORS[hashToIndex(name || "User")];
+
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        className="shrink-0 rounded-full object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
 
   return (
     <div
@@ -30,3 +41,4 @@ export function Avatar({ name = "", size = 44 }) {
 }
 
 export default Avatar;
+
