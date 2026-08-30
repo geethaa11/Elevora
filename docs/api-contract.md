@@ -222,6 +222,41 @@ Success 200:
 ```
 `match_score`: integer 0-100. Empty → `{ "items": [], "count": 0 }`.
 
+### POST /teaming/graph-match
+Auth required. Graph + Dynamic Programming (DP) Team Matching.
+Request:
+```json
+{ "team_size": 3 }
+```
+Validation: `team_size` must be between 2 and 5 (422 invalid_input if invalid).
+Success 200:
+```json
+{
+  "algorithm": "Graph + Dynamic Programming (DP) Team Optimizer",
+  "requested_team_size": 3,
+  "source_user_id": "string",
+  "team_overall_score": 85,
+  "selected_team_members": [
+    {
+      "user_id": "string",
+      "name": "string",
+      "skills": ["string"],
+      "interests": ["string"],
+      "preferred_role": "string",
+      "availability_time": "string",
+      "hackathons_participated": 3,
+      "hackathons_won": 1,
+      "compatibility_score": 85,
+      "shared_skills": ["string"],
+      "complementary_skills": ["string"],
+      "shared_interests": ["string"],
+      "availability_overlap": true
+    }
+  ],
+  "explanation": "string"
+}
+```
+
 ### POST /teams
 Auth required. Request: `{ "name": "string, required", "hackathon_id": "string, required", "description": "string, optional" }`
 Success 201:

@@ -5,7 +5,9 @@ from app.schemas.teaming import (
     StudentProfileResponse,
     TeamCreate,
     TeamResponse,
-    TeamMatchResponse
+    TeamMatchResponse,
+    GraphMatchRequest,
+    GraphMatchResponse
 )
 from app.services.teaming_service import (
     upsert_profile,
@@ -15,6 +17,7 @@ from app.services.teaming_service import (
     get_team_by_id,
     join_team
 )
+from app.services.graph_matching_service import find_optimal_team_graph_dp
 
 router = APIRouter(prefix="/api/v1", tags=["Teaming"])
 
@@ -53,6 +56,18 @@ def get_matches(user_id: str = Depends(get_current_user_id)):
     Requires Bearer JWT authentication.
     """
     return get_teammate_matches(current_user_id=user_id)
+
+@router.post("/teaming/graph-match", response_model=GraphMatchResponse)
+def post_graph_match(
+    req: GraphMatchRequest,
+    user_id: str = Depends(get_current_user_id)
+):
+    """
+    Graph + Dynamic Programming (DP) Team Matching Endpoint.
+    Builds an in-memory weighted compatibility graph and runs DP optimization to form the best team of requested size.
+    Requires Bearer JWT authentication.
+    """
+    return find_optimal_team_graph_dp(current_user_id=user_id, team_size=req.team_size)
 
 @router.post("/teams", response_model=TeamResponse, status_code=status.HTTP_201_CREATED)
 def post_create_team(
