@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
+import { StarfieldCometStreak } from '../ui/StarfieldCometStreak';
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-background relative">
+      <StarfieldCometStreak />
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 

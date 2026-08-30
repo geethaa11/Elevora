@@ -44,7 +44,7 @@ export function HackathonCard({ hackathon, onExplore }) {
   const urgent = days <= 3;
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-neutral-700 bg-surface shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-neutral-700 bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-[#D4AF37]/60 hover:shadow-lg hover:shadow-[#D4AF37]/10">
       <div className="relative flex h-28 items-center justify-center bg-gradient-to-br from-neutral-900 via-neutral-800 to-[#241a06]">
         <Icon className="h-9 w-9 text-primary/80" strokeWidth={1.5} />
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">

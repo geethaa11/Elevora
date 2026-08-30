@@ -1,9 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ScoreCard } from "../../components/domain/ScoreCard.jsx";
 import { Button } from "../../components/ui/Button.jsx";
 import { Badge } from "../../components/ui/Badge.jsx";
 import { useAppState } from "../../context/AppStateContext.jsx";
+
+function AnimatedOverallScore({ score }) {
+  const [displayScore, setDisplayScore] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const target = typeof score === "number" ? score : parseFloat(score) || 0;
+    const duration = 1500;
+    const steps = 40;
+    const stepTime = duration / steps;
+    const increment = target / steps;
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= target) {
+        setDisplayScore(target);
+        clearInterval(timer);
+      } else {
+        setDisplayScore(Math.round(start * 10) / 10);
+      }
+    }, stepTime);
+
+    return () => clearInterval(timer);
+  }, [score]);
+
+  return (
+    <p className="font-display text-5xl font-bold text-[#FFD700] drop-shadow-md">
+      {displayScore} <span className="text-2xl text-neutral-400 font-normal">/ 10</span>
+    </p>
+  );
+}
 
 function Section({ title, items, tone = "neutral" }) {
   return (
@@ -28,10 +59,10 @@ export function ValidatorResult() {
   if (!result) return <Navigate to="/validator" replace />;
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-8 py-4">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8 py-4 animate-fade-in">
       <header className="flex flex-col items-center gap-2 text-center">
         <Badge variant="ai">AI Powered Validation</Badge>
-        <p className="font-display text-4xl font-bold text-primary">{result.overallScore} / 10</p>
+        <AnimatedOverallScore score={result.overallScore} />
         <p className="text-sm text-neutral-400">Overall Idea Feasibility & Impact Score</p>
       </header>
 

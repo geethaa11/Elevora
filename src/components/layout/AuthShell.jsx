@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
+import { StarfieldCometStreak } from '../ui/StarfieldCometStreak';
 
 export function AuthShell() {
   const location = useLocation();
@@ -8,6 +9,7 @@ export function AuthShell() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background relative overflow-hidden">
+      <StarfieldCometStreak />
       {/* Background decoration */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary/10 blur-[120px] pointer-events-none" />

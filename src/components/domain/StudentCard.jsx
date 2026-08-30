@@ -6,7 +6,7 @@ import { Button } from "../ui/Button.jsx";
 
 export function StudentCard({ student, onConnect }) {
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-neutral-700 bg-surface p-4 shadow-sm transition-all hover:border-primary/40">
+    <article className="flex flex-col gap-3 rounded-xl border border-neutral-700 bg-surface p-4 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-[#D4AF37]/60 hover:shadow-lg hover:shadow-[#D4AF37]/10">
       <div className="flex items-start gap-3">
         <Avatar name={student.name} />
         <div className="min-w-0 flex-1">

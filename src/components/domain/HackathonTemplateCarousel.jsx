@@ -71,12 +71,20 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
   const [progress, setProgress] = useState(0);
   const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
 
+  // Mouse Drag & Touch Swipe Physics state
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartXRef = useRef(0);
+  const dragStartYRef = useRef(0);
+  const isHorizontalDragRef = useRef(null);
+  const dragOffsetRef = useRef(0);
+  const didDragRef = useRef(false);
+
   const containerRef = useRef(null);
-  const timerRef = useRef(null);
   const progressIntervalRef = useRef(null);
 
   const AUTO_PLAY_INTERVAL = 5000; // 5 seconds
-  const PROGRESS_TICK = 50; // update progress every 50ms
+  const PROGRESS_TICK = 50;
 
   const total = templates.length;
 
@@ -98,6 +106,8 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
   const goToSlide = useCallback((newIndex) => {
     setCurrentIndex(newIndex);
     setProgress(0);
+    setDragOffset(0);
+    dragOffsetRef.current = 0;
   }, []);
 
   const handleNext = useCallback(() => {
@@ -110,7 +120,7 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
 
   // Auto-play interval & smooth progress ticker
   useEffect(() => {
-    if (isPaused || shouldReduceMotion || total <= 1) {
+    if (isPaused || isDragging || shouldReduceMotion || total <= 1) {
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
       return;
     }
@@ -133,7 +143,73 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
     return () => {
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
-  }, [currentIndex, isPaused, shouldReduceMotion, total, handleNext, progress]);
+  }, [currentIndex, isPaused, isDragging, shouldReduceMotion, total, handleNext, progress]);
+
+  // Mouse Drag & Touch Handlers
+  const handlePointerDown = (e) => {
+    if (total <= 1) return;
+    setIsDragging(true);
+    setIsPaused(true);
+    didDragRef.current = false;
+    dragStartXRef.current = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    dragStartYRef.current = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+    isHorizontalDragRef.current = null;
+    dragOffsetRef.current = 0;
+    setDragOffset(0);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDragging) return;
+
+    const currentX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+
+    const deltaX = currentX - dragStartXRef.current;
+    const deltaY = currentY - dragStartYRef.current;
+
+    if (isHorizontalDragRef.current === null) {
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        isHorizontalDragRef.current = Math.abs(deltaX) > Math.abs(deltaY);
+      }
+    }
+
+    if (isHorizontalDragRef.current) {
+      if (Math.abs(deltaX) > 6) {
+        didDragRef.current = true;
+      }
+      const clampedOffset = Math.max(-180, Math.min(180, deltaX));
+      dragOffsetRef.current = clampedOffset;
+      setDragOffset(clampedOffset);
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    const finalOffset = dragOffsetRef.current;
+    const DRAG_THRESHOLD = 45;
+
+    if (finalOffset < -DRAG_THRESHOLD) {
+      handleNext();
+    } else if (finalOffset > DRAG_THRESHOLD) {
+      handlePrev();
+    } else {
+      setDragOffset(0);
+    }
+
+    dragOffsetRef.current = 0;
+    setTimeout(() => {
+      setIsPaused(false);
+    }, 1200);
+  };
+
+  const handleCardClick = (e) => {
+    if (didDragRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
 
   // Keyboard navigation
   const handleKeyDown = (e) => {
@@ -153,20 +229,23 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
   const currTemplate = templates[currentIndex];
   const nextTemplate = templates[nextIndex];
 
+  const dragRotation = (dragOffset / 180) * 3;
+  const dragScale = isDragging ? 0.98 : 1.02;
+
   return (
     <section
       ref={containerRef}
       onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={() => setIsPaused(true)}
-      onTouchEnd={() => setIsPaused(false)}
+      onMouseLeave={() => {
+        if (!isDragging) setIsPaused(false);
+      }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
       aria-label="Hackathon Templates Carousel"
       className="relative w-full max-w-7xl mx-auto flex flex-col gap-6 py-6 px-4 sm:px-6 overflow-x-hidden outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] rounded-2xl"
     >
-      {/* Header with Title and Status Indicator */}
+      {/* Header with Title and Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-50 flex items-center gap-2">
@@ -174,7 +253,7 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
             <span>{title}</span>
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 mt-0.5">
-            Auto-advancing every 5 seconds. Hover or touch to pause.
+            Auto-advancing every 5 seconds. Drag, swipe or hover to pause.
           </p>
         </div>
 
@@ -197,42 +276,60 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
         </div>
       </div>
 
-      {/* 3-Card Carousel Container */}
-      <div className="relative w-full min-h-[380px] sm:min-h-[400px] flex items-center justify-center py-4 select-none">
+      {/* 3-Card Carousel Container with Drag Physics */}
+      <div
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
+        className="relative w-full min-h-[380px] sm:min-h-[400px] flex items-center justify-center py-4 select-none cursor-grab active:cursor-grabbing"
+      >
         <div className="w-full flex items-center justify-center gap-2 sm:gap-4 md:gap-6">
           
-          {/* PREVIOUS CARD (Left - faint, smaller, 45% opacity) */}
+          {/* PREVIOUS CARD (Left preview - 45% opacity, offset) */}
           <div
-            onClick={() => handlePrev()}
+            onClick={(e) => {
+              handleCardClick(e);
+              if (!didDragRef.current) handlePrev();
+            }}
             className="hidden md:flex flex-col flex-1 max-w-[320px] rounded-2xl border border-neutral-800 bg-surface/40 p-5 cursor-pointer opacity-45 scale-[0.88] hover:opacity-75 transition-all duration-350 ease-out shadow-sm pointer-events-auto"
             style={{
-              transition: shouldReduceMotion ? "none" : "all 350ms cubic-bezier(0.25, 0.8, 0.25, 1)",
+              transform: `translateX(${dragOffset * 0.3}px) scale(0.88)`,
+              transition: isDragging || shouldReduceMotion ? "none" : "all 350ms cubic-bezier(0.25, 0.8, 0.25, 1)",
             }}
           >
             <CardContent template={prevTemplate} isCurrent={false} />
           </div>
 
-          {/* CURRENT CARD (Center - bright, embossed, 100% opacity, gold glow) */}
+          {/* CURRENT CARD (Center primary - 100% opacity, elevated gold glow border) */}
           <div
-            className="flex flex-col w-full max-w-[460px] rounded-2xl p-6 sm:p-7 z-20 transition-all duration-350 ease-out pointer-events-auto"
+            onClickCapture={handleCardClick}
+            className="flex flex-col w-full max-w-[460px] rounded-2xl p-6 sm:p-7 z-20 pointer-events-auto"
             style={{
               opacity: 1,
-              transform: "scale(1.02)",
+              transform: `translateX(${dragOffset}px) rotate(${dragRotation}deg) scale(${dragScale})`,
               boxShadow: "0 14px 40px rgba(212, 175, 55, 0.28), 0 0 2px #D4AF37",
               border: "1.5px solid rgba(212, 175, 55, 0.8)",
               backgroundColor: "rgba(26, 26, 29, 0.98)",
-              transition: shouldReduceMotion ? "none" : "all 350ms cubic-bezier(0.25, 0.8, 0.25, 1)",
+              transition: isDragging || shouldReduceMotion ? "none" : "all 350ms cubic-bezier(0.25, 0.8, 0.25, 1)",
             }}
           >
             <CardContent template={currTemplate} isCurrent={true} />
           </div>
 
-          {/* NEXT CARD (Right - faint, smaller, 45% opacity) */}
+          {/* NEXT CARD (Right preview - 45% opacity, offset) */}
           <div
-            onClick={() => handleNext()}
+            onClick={(e) => {
+              handleCardClick(e);
+              if (!didDragRef.current) handleNext();
+            }}
             className="hidden md:flex flex-col flex-1 max-w-[320px] rounded-2xl border border-neutral-800 bg-surface/40 p-5 cursor-pointer opacity-45 scale-[0.88] hover:opacity-75 transition-all duration-350 ease-out shadow-sm pointer-events-auto"
             style={{
-              transition: shouldReduceMotion ? "none" : "all 350ms cubic-bezier(0.25, 0.8, 0.25, 1)",
+              transform: `translateX(${dragOffset * 0.3}px) scale(0.88)`,
+              transition: isDragging || shouldReduceMotion ? "none" : "all 350ms cubic-bezier(0.25, 0.8, 0.25, 1)",
             }}
           >
             <CardContent template={nextTemplate} isCurrent={false} />
@@ -268,7 +365,7 @@ export function HackathonTemplateCarousel({ templates = hackathonTemplates, titl
         </div>
 
         {/* Status Hint */}
-        {isPaused && (
+        {(isPaused || isDragging) && (
           <span className="text-[11px] text-[#D4AF37] font-medium tracking-wide animate-pulse">
             ⏸ Auto-play paused (User interaction active)
           </span>
