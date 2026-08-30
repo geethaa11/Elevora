@@ -1,73 +1,81 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from backend.services.matching_service import calculate_compatibility, normalize_list, is_complementary_role, get_broad_skill_bucket
+import json
 
-@pytest.fixture
-def mock_db():
-    db = MagicMock()
-    return db
+class MockProfile:
+    def __init__(self, skills="[]", interests="[]", preferred_role="", hackathon_interests="[]", college_name=""):
+        self.skills = skills
+        self.interests = interests
+        self.preferred_role = preferred_role
+        self.hackathon_interests = hackathon_interests
+        self.college_name = college_name
 
-@patch("backend.services.matching_service.NEO4J_ENABLED", True)
-@patch("backend.services.matching_service.is_neo4j_available", True)
-@patch("backend.services.matching_service.get_neo4j_matches")
-def test_matching_neo4j_success(mock_get_neo4j_matches, mock_db):
-    from backend.services.matching_service import get_matches_for_user
-    
-    # Mock Neo4j returning candidates
-    mock_get_neo4j_matches.return_value = [
-        {"user_id": 2, "match_score": 10.0, "shared_skills": ["Python"], "shared_interests": []}
-    ]
-    
-    # Mock DB target user
-    mock_target = MagicMock()
-    mock_target.profile.preferred_role = "Backend"
-    mock_target.profile.hackathon_interests = '[]'
-    
-    # Mock DB candidate user
-    mock_candidate = MagicMock()
-    mock_candidate.id = 2
-    mock_candidate.name = "Test Candidate"
-    mock_candidate.profile.teaming_preference = "looking"
-    mock_candidate.profile.preferred_role = "Frontend" # Different role = +3 score
-    mock_candidate.profile.hackathon_interests = '[]'
-    
-    def side_effect(model):
-        q = MagicMock()
-        def filter_mock(*args, **kwargs):
-            return q
-        q.filter = filter_mock
-        def first_mock():
-            # Rough simulation: first time it's target, second time it's candidate
-            if mock_get_neo4j_matches.called:
-                return mock_candidate
-            return mock_target
-        q.first = first_mock
-        return q
-        
-    mock_db.query.side_effect = side_effect
-    
-    # First call will get target user, then call neo4j, then get candidate
-    # But wait, my side_effect mock is a bit too simple, let's just mock the first() explicitly 
-    # to avoid complex mocking if we can just test the logic fallback.
-    pass # In a real test we'd fully mock the sqlalchemy query chaining.
+def test_normalize_list():
+    assert normalize_list("[\"Python\", \" SQL \"]") == ["python", "sql"]
+    assert normalize_list([" Python", "SQL "]) == ["python", "sql"]
+    assert normalize_list("") == []
+    assert normalize_list(None) == []
 
-@patch("backend.services.matching_service.NEO4J_ENABLED", True)
-@patch("backend.services.matching_service.is_neo4j_available", True)
-@patch("backend.services.matching_service.get_neo4j_matches")
-def test_matching_neo4j_fallback(mock_get_neo4j_matches, mock_db):
-    from backend.services.matching_service import get_matches_for_user
+def test_is_complementary_role():
+    assert is_complementary_role("backend", "frontend") is True
+    assert is_complementary_role("backend", "backend") is False
+    assert is_complementary_role("frontend", "ui/ux") is True
+    assert is_complementary_role("data science", "backend") is True
+
+def test_get_broad_skill_bucket():
+    assert get_broad_skill_bucket("react") == "frontend"
+    assert get_broad_skill_bucket("python") == "backend"
+    assert get_broad_skill_bucket("tensorflow") == "ai/data"
+    assert get_broad_skill_bucket("figma") == "ui/ux"
+
+def test_calculate_compatibility():
+    target = MockProfile(
+        skills='["Python", "FastAPI"]',
+        interests='["AI"]',
+        preferred_role="backend",
+        hackathon_interests='["HackMIT"]',
+        college_name="MIT"
+    )
     
-    # Simulate Neo4j raising an exception
-    mock_get_neo4j_matches.side_effect = Exception("Neo4j offline")
+    # Candidate 1: Complementary (Frontend)
+    cand1 = MockProfile(
+        skills='["React", "CSS"]',
+        interests='["AI"]',
+        preferred_role="frontend",
+        hackathon_interests='["HackMIT"]',
+        college_name="MIT"
+    )
     
-    mock_target = MagicMock()
-    mock_target.profile.skills = '[]'
-    mock_target.profile.interests = '[]'
-    mock_target.profile.preferred_role = ""
-    mock_target.profile.hackathon_interests = '[]'
+    comp1 = calculate_compatibility(target, cand1)
     
-    mock_db.query().filter().first.return_value = mock_target
-    mock_db.query().filter().all.return_value = []
+    # Score breakdown:
+    # No shared skills (0)
+    # Shared interest "ai" (0.1)
+    # Shared hackathon "hackmit" (0.15)
+    # Comp role (backend vs frontend) (0.15)
+    # Comp skills (frontend vs backend) (0.05 max)
+    # Same college (0.10)
+    assert comp1["complementary_role"] is True
+    assert len(comp1["shared_interests"]) == 1
+    assert "React" in comp1["complementary_skills"] or "Css" in comp1["complementary_skills"]
+    assert "Complementary role (Frontend)" in comp1["match_reasons"]
+    assert "Same college/university" in comp1["match_reasons"]
     
-    # Should fallback to SQLite which returns empty list since no other users
-    res = get_matches_for_user(mock_db, 1)
-    assert res == []
+    # Candidate 2: Similar Backend but fewer other matches
+    cand2 = MockProfile(
+        skills='["Python", "Django", "SQL"]',
+        interests='["Web Dev"]',
+        preferred_role="backend",
+        college_name="Stanford"
+    )
+    
+    comp2 = calculate_compatibility(target, cand2)
+    assert comp2["complementary_role"] is False
+    assert len(comp2["shared_skills"]) == 1 # python
+    
+    # Empty profile fallback
+    empty_target = MockProfile()
+    empty_cand = MockProfile()
+    comp_empty = calculate_compatibility(empty_target, empty_cand)
+    assert comp_empty["score"] == 0.10 # Base score for recommendation
+    assert "General recommendation" in comp_empty["match_reasons"]

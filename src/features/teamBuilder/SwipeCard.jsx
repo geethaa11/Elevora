@@ -23,7 +23,7 @@ export function SwipeCard({ student, onSwipe, isFront }) {
   };
 
   const scorePercentage = student.match_score 
-    ? Math.min(Math.round(student.match_score * 10), 100) // Rough conversion to %
+    ? Math.min(Math.round(student.match_score * 100), 100)
     : null;
 
   return (
@@ -58,7 +58,33 @@ export function SwipeCard({ student, onSwipe, isFront }) {
           </div>
         </div>
 
-        <div className="w-full space-y-4 my-6 flex-1 overflow-y-auto">
+        <div className="w-full space-y-4 my-6 flex-1 overflow-y-auto pr-2">
+          {student.match_reasons?.length > 0 && (
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">Why this match?</h3>
+              <ul className="space-y-1">
+                {student.match_reasons.map((reason, i) => (
+                  <li key={i} className="text-sm text-neutral-300 flex items-start gap-2">
+                    <span className="text-primary mt-1 text-[10px]">●</span> {reason}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {student.complementary_skills?.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-neutral-400 mb-2">Brings to your team</h3>
+              <div className="flex flex-wrap gap-2">
+                {student.complementary_skills.map((skill, i) => (
+                  <span key={i} className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-md text-sm border border-emerald-500/20">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {student.shared_skills?.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-neutral-400 mb-2">Shared Skills</h3>
@@ -83,10 +109,6 @@ export function SwipeCard({ student, onSwipe, isFront }) {
                 ))}
               </div>
             </div>
-          )}
-
-          {(!student.shared_skills?.length && !student.shared_interests?.length) && (
-            <p className="text-neutral-500 italic text-sm">Recommended based on complementary roles or hackathon interests.</p>
           )}
         </div>
 
