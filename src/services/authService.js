@@ -13,11 +13,18 @@ async function handleResponse(response) {
     let errorMsg = 'An error occurred';
     try {
       const errorData = await response.json();
-      errorMsg = errorData.detail || errorData.message || errorMsg;
+      if (response.status === 422 && Array.isArray(errorData.detail)) {
+        errorMsg = errorData.detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join(', ');
+      } else {
+        errorMsg = errorData.detail || errorData.message || errorMsg;
+      }
     } catch (e) {
       // Ignore JSON parse error
     }
-    throw new Error(errorMsg);
+    
+    const error = new Error(errorMsg);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }

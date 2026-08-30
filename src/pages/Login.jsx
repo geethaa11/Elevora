@@ -36,7 +36,11 @@ export function Login() {
       navigate('/home');
     } catch (err) {
       console.error(err);
-      setError('Failed to log in. Please check your credentials.');
+      if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+        setError('Network failure: Unable to connect to the server.');
+      } else {
+        setError(err.message || 'Failed to log in. Please check your credentials.');
+      }
     } finally {
       setLoading(false);
     }

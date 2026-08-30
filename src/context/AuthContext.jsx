@@ -39,9 +39,8 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const signup = async (email, password) => {
-    const name = email.split('@')[0];
-    const data = await signupApi(name, email, password, 'student');
+  const signup = async (name, email, password, role = 'student') => {
+    const data = await signupApi(name, email, password, role);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user_id', data.user_id);
     
@@ -78,9 +77,11 @@ export function AuthProvider({ children }) {
   const loginWithGoogle = async () => {
     // For the "Mock Signup (Demo)" button, generate a mock credential
     // and try to sign up or log in
-    const email = `demo_${Date.now()}@elevora.com`;
+    const randomId = Date.now();
+    const name = `Demo User ${randomId}`;
+    const email = `demo_${randomId}@elevora.com`;
     const password = "DemoPassword123!";
-    return signup(email, password);
+    return signup(name, email, password, 'student');
   };
 
   const logout = async () => {
