@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loginApi, signupApi, getUserProfile, submitOnboarding } from '../services/authService';
+import { submitOnboarding } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -8,110 +8,126 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(undefined); // undefined means loading
-  
-  // We can still expose a mock flag if some components depend on it, 
-  // but now we're using real backend
-  const USE_MOCK = false;
+  const [currentUser, setCurrentUser] = useState(undefined);
+
+  // DEMO MODE:
+  // Authentication is handled locally so the deployed demo
+  // does not depend on the backend login endpoint.
+  const USE_MOCK = true;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('user_id');
-    
-    if (token && userId) {
-      getUserProfile(userId).then(user => {
-        setCurrentUser({
-          uid: user.id,
-          email: user.email,
-          displayName: user.name,
-          role: user.role,
-          completedOnboarding: !!user.profile,
-          ...user.profile
-        });
-      }).catch(err => {
-        console.error("Session expired or invalid", err);
+    const savedUser = localStorage.getItem('user');
+
+    if (token && userId && savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('Invalid saved demo session');
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
+        localStorage.removeItem('user');
         setCurrentUser(null);
-      });
+      }
     } else {
       setCurrentUser(null);
     }
   }, []);
 
-  const signup = async (name, email, password, role = 'student') => {
-    const data = await signupApi(name, email, password, role);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user_id', data.user_id);
-    
-    const user = {
-      uid: data.user_id,
-      email,
-      displayName: name,
-      role: data.role,
-      completedOnboarding: false
-    };
-    setCurrentUser(user);
-    return user;
-  };
-
+  // DEMO LOGIN — no backend request
   const login = async (email, password) => {
-    const data = await loginApi(email, password);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user_id', data.user_id);
-    
-    const userProfile = await getUserProfile(data.user_id);
-    
     const user = {
-      uid: userProfile.id,
-      email: userProfile.email,
-      displayName: userProfile.name,
-      role: userProfile.role,
-      completedOnboarding: !!userProfile.profile,
-      ...userProfile.profile
+      uid: 1,
+      user_id: 1,
+      email: email,
+      displayName: 'Demo Student',
+      name: 'Demo Student',
+      role: 'student',
+      completedOnboarding: true
     };
+
+    localStorage.setItem('token', 'elevora-demo-session');
+    localStorage.setItem('user_id', '1');
+    localStorage.setItem('user', JSON.stringify(user));
+
     setCurrentUser(user);
+
     return user;
   };
 
-  const loginWithGoogle = async () => {
-    // For the "Mock Signup (Demo)" button, generate a mock credential
-    // and try to sign up or log in
-    const randomId = Date.now();
-    const name = `Demo User ${randomId}`;
-    const email = `demo_${randomId}@elevora.com`;
-    const password = "DemoPassword123!";
-    return signup(name, email, password, 'student');
+  // DEMO SIGNUP — no backend request
+  const signup = async (name, email, password, role = 'student') => {
+    const user = {
+      uid: 1,
+      user_id: 1,
+      email: email,
+      displayName: name,
+      name: name,
+      role: role,
+      completedOnboarding: true
+    };
+
+    localStorage.setItem('token', 'elevora-demo-session');
+    localStorage.setItem('user_id', '1');
+    localStorage.setItem('user', JSON.stringify(user));
+
+    setCurrentUser(user);
+
+    return user;
   };
 
+  // Demo Google login
+  const loginWithGoogle = async () => {
+    const user = {
+      uid: 1,
+      user_id: 1,
+      email: 'demo@elevora.com',
+      displayName: 'Demo Student',
+      name: 'Demo Student',
+      role: 'student',
+      completedOnboarding: true
+    };
+
+    localStorage.setItem('token', 'elevora-demo-session');
+    localStorage.setItem('user_id', '1');
+    localStorage.setItem('user', JSON.stringify(user));
+
+    setCurrentUser(user);
+
+    return user;
+  };
+
+  // Demo GitHub login
   const loginWithGithub = async () => {
-    const randomId = Date.now();
-    const name = `GitHub User ${randomId}`;
-    const email = `github_${randomId}@elevora.com`;
-    const password = "DemoPassword123!";
-    return signup(name, email, password, 'student');
+    return loginWithGoogle();
   };
 
   const logout = async () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user_id');
+    localStorage.removeItem('user');
+
     setCurrentUser(null);
   };
 
   const completeOnboarding = async (userData) => {
-    if (currentUser?.uid) {
-      const result = await submitOnboarding(currentUser.uid, userData);
-      if (result.success) {
-        const updatedUser = { 
-          ...currentUser, 
-          ...result.profile, 
-          completedOnboarding: true 
-        };
-        setCurrentUser(updatedUser);
-        return updatedUser;
-      }
+    if (!currentUser?.uid) {
+      return currentUser;
     }
-    return currentUser;
+
+    // Keep onboarding locally available for demo mode.
+    const updatedUser = {
+      ...currentUser,
+      ...userData,
+      completedOnboarding: true
+    };
+
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setCurrentUser(updatedUser);
+
+    return updatedUser;
   };
 
   const value = {
