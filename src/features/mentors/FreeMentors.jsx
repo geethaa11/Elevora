@@ -5,6 +5,8 @@ import { Select } from "../../components/ui/Select.jsx";
 import { MentorCard } from "../../components/domain/MentorCard.jsx";
 import { EmptyState } from "../../components/domain/States.jsx";
 
+import { Shared3CardCarousel } from "../../components/ui/Shared3CardCarousel.jsx";
+
 export function FreeMentors() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({ expertise: "", availability: "" });
@@ -54,11 +56,11 @@ export function FreeMentors() {
       {filtered.length === 0 ? (
         <EmptyState message="No volunteer mentors available right now." />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((m) => (
-            <MentorCard key={m.id} mentor={m} kind="free" />
-          ))}
-        </div>
+        <Shared3CardCarousel
+          title="Volunteer Mentors Deck"
+          items={filtered}
+          renderCard={(m) => <MentorCard mentor={m} kind="free" />}
+        />
       )}
     </div>
   );

@@ -11,6 +11,9 @@ import {
   QUICK_FILTERS,
   groupByMonth,
 } from "../../utils/dateUtils.js";
+import { Shared3CardCarousel } from "../../components/ui/Shared3CardCarousel.jsx";
+import HackathonCard from "../../components/domain/HackathonCard.jsx";
+import { HackathonTemplateCarousel } from "../../components/domain/HackathonTemplateCarousel.jsx";
 
 const SECTION_ORDER = [
   "closingSoon",
@@ -149,12 +152,21 @@ export function HackathonExplorer() {
         </div>
       </div>
 
+      {/* Hackathon Templates Auto-Play Carousel */}
+      <HackathonTemplateCarousel />
+
       {loading ? (
         <LoadingState />
       ) : sorted.length === 0 ? (
         <EmptyState message="No hackathons match your filters." />
       ) : (
         <div className="flex flex-col gap-10">
+          <Shared3CardCarousel
+            title="Featured Hackathons Deck"
+            items={sorted}
+            renderCard={(h) => <HackathonCard hackathon={h} onExplore={handleExplore} />}
+          />
+
           {SECTION_ORDER.map((sectionId) => {
             const items = sections[sectionId];
             if (items.length === 0) return null;

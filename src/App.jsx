@@ -40,10 +40,13 @@ import { PaidMentors } from './features/mentors/PaidMentors';
 import { PaidMentorProfile } from './features/mentors/PaidMentorProfile';
 import { PaidBooking } from './features/mentors/PaidBooking';
 
+import { CustomGoldenCursor } from './components/ui/CustomGoldenCursor';
+
 function App() {
   return (
     <AuthProvider>
       <AppStateProvider>
+        <CustomGoldenCursor />
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
 

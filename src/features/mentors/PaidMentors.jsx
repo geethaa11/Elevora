@@ -5,6 +5,8 @@ import { Select } from "../../components/ui/Select.jsx";
 import { MentorCard } from "../../components/domain/MentorCard.jsx";
 import { EmptyState } from "../../components/domain/States.jsx";
 
+import { Shared3CardCarousel } from "../../components/ui/Shared3CardCarousel.jsx";
+
 export function PaidMentors() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({ expertise: "", experience: "" });
@@ -54,11 +56,11 @@ export function PaidMentors() {
       {filtered.length === 0 ? (
         <EmptyState message="No experts match your filters." />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((m) => (
-            <MentorCard key={m.id} mentor={m} kind="paid" />
-          ))}
-        </div>
+        <Shared3CardCarousel
+          title="Expert Mentors Deck"
+          items={filtered}
+          renderCard={(m) => <MentorCard mentor={m} kind="paid" />}
+        />
       )}
     </div>
   );

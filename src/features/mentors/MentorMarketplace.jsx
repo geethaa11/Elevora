@@ -2,8 +2,20 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HeartHandshake, Trophy } from "lucide-react";
 import { Badge } from "../../components/ui/Badge.jsx";
+import { Shared3CardCarousel } from "../../components/ui/Shared3CardCarousel.jsx";
+import { MentorCard } from "../../components/domain/MentorCard.jsx";
+import { freeMentors, paidMentors } from "../../data/mentors.js";
 
 export function MentorMarketplace() {
+  const featuredMentors = [
+    { ...freeMentors[0], kind: "free" },
+    { ...paidMentors[0], kind: "paid" },
+    { ...freeMentors[1], kind: "free" },
+    { ...paidMentors[1], kind: "paid" },
+    { ...freeMentors[2], kind: "free" },
+    { ...paidMentors[2], kind: "paid" },
+  ];
+
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 py-4">
       <header className="flex flex-col gap-1">
@@ -48,8 +60,17 @@ export function MentorMarketplace() {
           <span className="mt-auto text-sm font-semibold text-primary">Find Expert Mentors →</span>
         </Link>
       </div>
+
+      <div className="flex flex-col gap-4 pt-4 border-t border-neutral-800">
+        <Shared3CardCarousel
+          title="Featured Mentor Recommendations"
+          items={featuredMentors}
+          renderCard={(m) => <MentorCard mentor={m} kind={m.kind} />}
+        />
+      </div>
     </div>
   );
 }
 
 export default MentorMarketplace;
+

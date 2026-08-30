@@ -8,6 +8,12 @@
     --color-background: #0D0D0F;
     --color-surface: #1A1A1D;
   }
+
+  @media (pointer: fine) {
+    html, body, button, a, input, select, textarea {
+      cursor: none !important;
+    }
+  }
 }
 
 @layer utilities {
@@ -18,3 +24,4 @@
     @apply bg-ai-gradient bg-clip-text text-transparent;
   }
 }
+
