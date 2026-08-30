@@ -36,8 +36,8 @@ export function ScrollStarLine() {
         const length = pathLengthRef.current;
         const point = pathRef.current.getPointAtLength(progress * length);
         
-        dotRef.current.setAttribute('cx', point.x);
-        dotRef.current.setAttribute('cy', point.y);
+        dotRef.current.style.left = `${point.x}%`;
+        dotRef.current.style.top = `${point.y / 10}%`;
         
         rafId = null;
       });
@@ -70,38 +70,6 @@ export function ScrollStarLine() {
   return (
     <div className="absolute right-0 top-0 w-24 md:w-48 h-full pointer-events-none z-[48] hidden lg:block overflow-visible">
       <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 1000">
-        <defs>
-          <filter id="comet-glow" x="-200%" y="-200%" width="500%" height="500%">
-            {/* Gold core blur */}
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="coreGlow"/>
-            
-            {/* Purple trailing tail (blurred and offset up/back) */}
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="tailBlur"/>
-            <feOffset in="tailBlur" dx="0" dy="-12" result="tailOffset"/>
-            <feColorMatrix in="tailOffset" type="matrix" values="
-              0 0 0 0 0.427
-              0 0 0 0 0.157
-              0 0 0 0 0.851
-              0 0 0 0.8 0" result="purpleTail"/>
-              
-            {/* Secondary longer gold tail */}
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="longTailBlur"/>
-            <feOffset in="longTailBlur" dx="0" dy="-25" result="longTailOffset"/>
-            <feColorMatrix in="longTailOffset" type="matrix" values="
-              0 0 0 0 0.72
-              0 0 0 0 0.52
-              0 0 0 0 0.04
-              0 0 0 0.4 0" result="goldTail"/>
-
-            <feMerge>
-              <feMergeNode in="goldTail"/>
-              <feMergeNode in="purpleTail"/>
-              <feMergeNode in="coreGlow"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        
         <path 
           ref={pathRef}
           d="M 20,0 
@@ -117,16 +85,17 @@ export function ScrollStarLine() {
           strokeOpacity="0.4"
           vectorEffect="non-scaling-stroke"
         />
-        
-        <circle 
-          ref={dotRef}
-          cx="20" 
-          cy="0" 
-          r="3" 
-          fill="#FFF" 
-          filter="url(#comet-glow)"
-        />
       </svg>
+      <div 
+        ref={dotRef}
+        className="absolute w-1.5 h-1.5 bg-white rounded-full"
+        style={{
+          left: '20%',
+          top: '0%',
+          transform: 'translate(-50%, -50%)',
+          boxShadow: '0 0 10px 3px rgba(184, 134, 11, 0.8), 0 0 4px 1px rgba(255, 255, 255, 0.9)'
+        }}
+      />
     </div>
   );
 }
