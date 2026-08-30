@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { Logo } from './Logo';
 import { 
-  Home, 
   Compass, 
   Lightbulb, 
   Users, 
@@ -15,7 +14,6 @@ import {
 
 export function Sidebar({ className }) {
   const navItems = [
-    { label: 'Home', icon: Home, href: '/home' },
     { label: 'Hackathon Explorer', icon: Compass, href: '/hackathons' },
     { label: 'Student Teaming', icon: Users, href: '/team-builder' },
     { label: 'AI Validator', icon: Lightbulb, href: '/validator' },
