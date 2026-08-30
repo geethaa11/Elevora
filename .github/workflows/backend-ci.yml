@@ -1,14 +1,15 @@
-```yaml
 name: Backend CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "backend/**"
       - ".github/workflows/backend-ci.yml"
   pull_request:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "backend/**"
       - ".github/workflows/backend-ci.yml"
@@ -16,7 +17,6 @@ on:
 jobs:
   backend-check:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,4 +45,3 @@ jobs:
       - name: Compile Python files
         run: |
           python -m compileall backend
-```
