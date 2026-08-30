@@ -1,47 +1,70 @@
-import { students } from "../data/students.js";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 function getHeaders() {
   const token = localStorage.getItem('token');
+
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {})
   };
 }
 
-export async function getTeamMatches(userId, limit = 10, offset = 0) {
-  const response = await fetch(`${BASE_URL}/api/v1/team-matches/${userId}?limit=${limit}&offset=${offset}`, {
-    method: 'GET',
-    headers: getHeaders()
-  });
+async function handleResponse(response) {
   if (!response.ok) {
-    if (response.status === 401) throw new Error('Unauthorized');
-    if (response.status === 403) throw new Error('Forbidden');
-    if (response.status === 404) throw new Error('Not found');
-    throw new Error('Failed to fetch matches');
+    let message = `Request failed (${response.status})`;
+
+    try {
+      const data = await response.json();
+      message = data.detail || data.message || message;
+    } catch {
+      // Keep default message
+    }
+
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
+
   return response.json();
+}
+
+export async function getTeamMatches(userId, limit = 10, offset = 0) {
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
+
+  const response = await fetch(
+    `${BASE_URL}/api/v1/team-matches/${userId}?limit=${limit}&offset=${offset}`,
+    {
+      method: 'GET',
+      headers: getHeaders()
+    }
+  );
+
+  return handleResponse(response);
 }
 
 export async function swipeAction(swipedId, action) {
-  const response = await fetch(`${BASE_URL}/api/v1/team-matches/${action}`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({ swiped_id: swipedId, action: action })
-  });
-  if (!response.ok) {
-    const err = new Error(`Failed to record ${action}`);
-    err.status = response.status;
-    throw err;
+  if (!swipedId) {
+    throw new Error('Student ID is required');
   }
-  return response.json();
-}
 
-export async function getStudents() {
-  return students;
-}
+  if (action !== 'interested' && action !== 'pass') {
+    throw new Error('Invalid swipe action');
+  }
 
-export async function getStudentById(id) {
-  return students.find((s) => s.id === id) || null;
+  const response = await fetch(
+    `${BASE_URL}/api/v1/team-matches/${action}`,
+    {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        swiped_id: swipedId,
+        action
+      })
+    }
+  );
+
+  return handleResponse(response);
 }
