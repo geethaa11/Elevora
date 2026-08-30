@@ -10,7 +10,7 @@ export function Onboarding() {
 
   const handleComplete = async () => {
     await completeOnboarding({ skills: ['React', 'Firebase'] });
-    navigate('/home');
+    navigate('/team-builder');
   };
 
   return (

@@ -69,8 +69,8 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           {currentUser ? (
             <>
-              <Link to="/home">
-                <Button variant="ghost">Dashboard</Button>
+              <Link to="/team-builder">
+                <Button variant="ghost">Open App</Button>
               </Link>
               <Button variant="secondary" onClick={() => logout()}>
                 Logout

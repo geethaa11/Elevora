@@ -24,9 +24,9 @@ export function ProtectedRoute({ children }) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If user completed onboarding and tries to access onboarding, redirect to home
+  // If user completed onboarding and tries to access onboarding, redirect to team builder
   if (currentUser.completedOnboarding && location.pathname === '/onboarding') {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/team-builder" replace />;
   }
 
   return children;

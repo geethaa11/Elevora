@@ -14,7 +14,7 @@ export function Signup() {
     setLoading(true);
     try {
       await loginWithGoogle();
-      navigate('/home');
+      navigate('/team-builder');
     } catch (err) {
       console.error(err);
       if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {

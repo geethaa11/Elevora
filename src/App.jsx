@@ -12,7 +12,6 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { Onboarding } from './pages/Onboarding';
-import { Home } from './pages/Home';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 
@@ -77,7 +76,6 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
 
