@@ -2,21 +2,25 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Use Node.js 20.x
+      - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: "20"
           cache: "npm"
 
       - name: Install dependencies
@@ -24,6 +28,7 @@ jobs:
 
       - name: Check for lint script
         id: check_lint
+        shell: bash
         run: |
           if npm run | grep -q "^  lint$"; then
             echo "has_lint=true" >> "$GITHUB_OUTPUT"
