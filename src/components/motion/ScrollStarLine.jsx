@@ -5,9 +5,16 @@ export function ScrollStarLine() {
   const pathRef = useRef(null);
   const dotRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
+  
+  // Cache the path length so we don't recalculate it every scroll tick
+  const pathLengthRef = useRef(0);
 
   useEffect(() => {
     if (shouldReduceMotion) return;
+
+    if (pathRef.current) {
+      pathLengthRef.current = pathRef.current.getTotalLength();
+    }
 
     let rafId;
     const handleScroll = () => {
@@ -26,7 +33,7 @@ export function ScrollStarLine() {
         // Progress between 0 and 1
         const progress = Math.max(0, Math.min(1, docHeight > 0 ? scrollY / docHeight : 0));
         
-        const length = pathRef.current.getTotalLength();
+        const length = pathLengthRef.current;
         const point = pathRef.current.getPointAtLength(progress * length);
         
         dotRef.current.setAttribute('cx', point.x);
@@ -37,14 +44,23 @@ export function ScrollStarLine() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
+    
+    const handleResize = () => {
+      // Recalculate on resize in case vector shape changed
+      if (pathRef.current) {
+        pathLengthRef.current = pathRef.current.getTotalLength();
+      }
+      handleScroll();
+    };
+    
+    window.addEventListener('resize', handleResize);
     
     // Initial call
     setTimeout(handleScroll, 100);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener('resize', handleResize);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [shouldReduceMotion]);
@@ -52,7 +68,7 @@ export function ScrollStarLine() {
   if (shouldReduceMotion) return null;
 
   return (
-    <div className="absolute right-4 top-0 w-8 h-full pointer-events-none z-10 overflow-visible opacity-50 hidden md:block">
+    <div className="absolute right-4 top-0 w-8 h-full pointer-events-none z-[48] overflow-visible opacity-50 hidden md:block">
       <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 1000">
         <defs>
           <filter id="gold-glow">
@@ -68,7 +84,7 @@ export function ScrollStarLine() {
           d="M 50,0 Q 90,100 50,200 T 50,400 T 50,600 T 50,800 T 50,1000"
           fill="none" 
           stroke="#B8860B" 
-          strokeWidth="0.5"
+          strokeWidth="1.5"
           vectorEffect="non-scaling-stroke"
         />
         <circle 
